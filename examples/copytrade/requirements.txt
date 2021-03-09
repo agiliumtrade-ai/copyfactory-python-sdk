@@ -1,0 +1,2 @@
+metaapi-cloud-sdk==12.4.0
+metaapi-cloud-copyfactory-sdk==1.0.0

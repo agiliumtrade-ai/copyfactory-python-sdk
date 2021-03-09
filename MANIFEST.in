@@ -1,0 +1,6 @@
+recursive-include lib *
+recursive-include examples *
+include LICENSE
+include changelog.md
+exclude examples/copytrade/.env
+prune examples/copytrade/.metaapi

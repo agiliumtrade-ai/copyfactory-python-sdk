@@ -1,2 +1,0 @@
-# copyfactory-python-sdk
-

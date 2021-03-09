@@ -1,0 +1,12 @@
+stages:
+  - build
+
+build:
+  image: python:latest
+  stage: build
+  script:
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
+    - pip install . pytest-runner pycodestyle
+    - python setup.py pytest
+    - pycodestyle --max-line-length=120 lib
