@@ -1,5 +1,5 @@
 CopyFactory trade copying API for Python (a member of `metaapi.cloud <https://metaapi.cloud>`_ project)
-##########################################################################################################
+#######################################################################################################
 
 CopyFactory is a powerful trade copying API which makes developing forex
 trade copying applications as easy as writing few lines of code.
@@ -31,7 +31,7 @@ Frequently asked questions (FAQ)
 FAQ is located here: `http://metaapi.cloud/docs/copyfactory/faq <http://metaapi.cloud/docs/copyfactory/faq>`_
 
 CopyFactory copytrading API features
-====================
+====================================
 
 Features supported:
 
