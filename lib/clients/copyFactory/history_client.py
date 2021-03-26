@@ -8,7 +8,7 @@ from httpx import Response
 
 class HistoryClient(MetaApiClient):
     """metaapi.cloud CopyFactory history API (trade copying history API) client (see
-    https://trading-api-v1.project-stock.agiliumlabs.cloud/swagger/#/)"""
+    https://metaapi.cloud/docs/copyfactory/)"""
 
     def __init__(self, http_client, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
         """Inits CopyFactory history API client instance.
@@ -23,7 +23,7 @@ class HistoryClient(MetaApiClient):
 
     async def get_providers(self) -> 'Response[List[CopyFactorySubscriberOrProvider]]':
         """Returns list of providers providing strategies to the current user
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/get_users_current_providers
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getProviders/
 
         Returns:
             A coroutine resolving with providers found.
@@ -41,7 +41,7 @@ class HistoryClient(MetaApiClient):
 
     async def get_subscribers(self) -> 'Response[List[CopyFactorySubscriberOrProvider]]':
         """Returns list of subscribers providing strategies to the current user
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/get_users_current_subscribers
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getSubscribers/
 
         Returns:
             A coroutine resolving with subscribers found.
@@ -59,7 +59,7 @@ class HistoryClient(MetaApiClient):
 
     async def get_strategies_subscribed(self) -> 'Response[List[CopyFactoryStrategyIdAndName]]':
         """Returns list of strategies the current user is subscribed to
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/get_users_current_strategies_subscribed
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getStrategiesSubscribed/
 
         Returns:
             A coroutine resolving with strategies found.
@@ -77,7 +77,7 @@ class HistoryClient(MetaApiClient):
 
     async def get_provided_strategies(self) -> 'Response[List[CopyFactoryStrategyIdAndName]]':
         """Returns list of strategies the current user provides to other users
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/get_users_current_provided_strategies
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getProvidedStrategies/
 
         Returns:
             A coroutine resolving with strategies found.
@@ -98,8 +98,7 @@ class HistoryClient(MetaApiClient):
                                                    offset: int = None, limit: int = None) -> \
             'Response[List[CopyFactoryTransaction]]':
         """Returns list of transactions on the strategies the current user provides to other users
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /get_users_current_provided_strategies_transactions
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getProvidedStrategiesTransactions/
 
         Args:
             time_from: Time to load transactions from.
@@ -107,7 +106,7 @@ class HistoryClient(MetaApiClient):
             strategy_ids: Optional list of strategy ids to filter transactions by.
             subscriber_ids: Optional list of subscribers to filter transactions by.
             offset: Pagination offset. Default value is 0.
-            limit: Pagination limit. Default value is 10000.
+            limit: Pagination limit. Default value is 1000.
 
         Returns:
             A coroutine resolving with transactions found.
@@ -144,8 +143,7 @@ class HistoryClient(MetaApiClient):
                                                      offset: int = None, limit: int = None) -> \
             'Response[List[CopyFactoryTransaction]]':
         """Returns list of trades on the strategies the current user subscribed to
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /get_users_current_strategies_subscribed_transactions
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getStrategiesSubscribedTransactions/
 
         Args:
             time_from: Time to load transactions from.
@@ -153,7 +151,7 @@ class HistoryClient(MetaApiClient):
             strategy_ids: Optional list of strategy ids to filter transactions by.
             provider_ids: Optional list of providers to filter transactions by.
             offset: Pagination offset. Default value is 0.
-            limit: Pagination limit. Default value is 10000.
+            limit: Pagination limit. Default value is 1000.
 
         Returns:
             A coroutine resolving with transactions found.
