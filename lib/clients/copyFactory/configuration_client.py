@@ -11,7 +11,7 @@ from typing import List
 
 class ConfigurationClient(MetaApiClient):
     """metaapi.cloud CopyFactory configuration API (trade copying configuration API) client (see
-    https://trading-api-v1.project-stock.agiliumlabs.cloud/swagger/#/)"""
+    https://metaapi.cloud/docs/copyfactory/)"""
 
     def __init__(self, http_client, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
         """Inits CopyFactory configuration API client instance.
@@ -26,7 +26,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def generate_strategy_id(self) -> StrategyId:
         """Retrieves new unused strategy id. Method is accessible only with API access token. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/get_users_current_configuration_unused_strategy_id
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/generateStrategyId/
 
         Returns:
             A coroutine resolving with strategy id generated.
@@ -52,7 +52,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def get_accounts(self) -> 'List[CopyFactoryAccount]':
         """Retrieves CopyFactory copy trading accounts. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/get_users_current_configuration_accounts
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getAccounts/
 
         Returns:
             A coroutine resolving with CopyFactory accounts found.
@@ -68,10 +68,30 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
+    async def get_account(self, account_id: str) -> CopyFactoryAccount:
+        """Retrieves CopyFactory copy trading account by id. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getAccount/
+
+        Args:
+            account_id: CopyFactory account id.
+
+        Returns:
+            A coroutine resolving with CopyFactory account found.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('get_account')
+        opts = {
+            'url': f"{self._host}/users/current/configuration/accounts/{account_id}",
+            'method': 'GET',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        return await self._httpClient.request(opts)
+
     async def update_account(self, id: str, account: CopyFactoryAccountUpdate):
         """Updates a CopyFactory trade copying account. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /put_users_current_configuration_accounts_accountId
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/updateAccount/
 
         Args:
             id: Copy trading account id.
@@ -94,8 +114,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def remove_account(self, id: str):
         """Removes a CopyFactory trade copying account. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /delete_users_current_configuration_accounts_accountId
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeAccount/
 
         Args:
             id: Copy trading account id.
@@ -116,8 +135,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def get_strategies(self) -> 'List[CopyFactoryStrategy]':
         """Retrieves CopyFactory copy trading strategies. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /get_users_current_configuration_strategies
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getStrategies/
 
         Returns:
             A coroutine resolving with CopyFactory strategies found.
@@ -133,10 +151,30 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
+    async def get_strategy(self, strategy_id: str) -> CopyFactoryStrategy:
+        """Retrieves CopyFactory copy trading strategy by id. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getStrategy/
+
+        Args:
+            strategy_id: Trading strategy id.
+
+        Returns:
+            A coroutine resolving with CopyFactory strategy found.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('get_strategy')
+        opts = {
+            'url': f"{self._host}/users/current/configuration/strategies/{strategy_id}",
+            'method': 'GET',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        return await self._httpClient.request(opts)
+
     async def update_strategy(self, id: str, strategy: CopyFactoryStrategyUpdate):
         """Updates a CopyFactory strategy. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /put_users_current_configuration_strategies_strategyId
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/updateStrategy/
 
         Args:
             id: Copy trading strategy id.
@@ -159,8 +197,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def remove_strategy(self, id: str):
         """Removes a CopyFactory strategy. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /delete_users_current_configuration_strategies_strategyId
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeStrategy/
 
         Args:
             id: Copy trading strategy id.
@@ -181,8 +218,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def get_portfolio_strategies(self) -> 'List[CopyFactoryPortfolioStrategy]':
         """Retrieves CopyFactory copy portfolio strategies. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/
-        get_users_current_configuration_portfolio_strategies
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getPortfolioStrategies/
 
         Returns:
             A coroutine resolving with CopyFactory portfolio strategies found.
@@ -198,10 +234,30 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
+    async def get_portfolio_strategy(self, portfolio_id: str) -> CopyFactoryPortfolioStrategy:
+        """Retrieves CopyFactory copy portfolio strategies. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getPortfolioStrategy/
+
+        Args:
+            portfolio_id: Portfolio strategy id.
+
+        Returns:
+            A coroutine resolving with CopyFactory portfolio strategy found.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('get_portfolio_strategy')
+        opts = {
+            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}",
+            'method': 'GET',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        return await self._httpClient.request(opts)
+
     async def update_portfolio_strategy(self, id: str, strategy: CopyFactoryPortfolioStrategyUpdate):
         """Updates a CopyFactory portfolio strategy. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/
-        put_users_current_configuration_portfolio_strategies_portfolioId
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/updatePortfolioStrategy/
 
         Args:
             id: Copy trading portfolio strategy id.
@@ -224,8 +280,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def remove_portfolio_strategy(self, id: str):
         """Deletes a CopyFactory portfolio strategy. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/
-        delete_users_current_configuration_portfolio_strategies_portfolioId
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removePortfolioStrategy/
 
         Args:
             id: Portfolio strategy id.
@@ -246,8 +301,7 @@ class ConfigurationClient(MetaApiClient):
 
     async def get_active_resynchronization_tasks(self, connection_id) -> 'List[ResynchronizationTask]':
         """Returns list of active resynchronization tasks for a specified connection. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/
-        get_users_current_configuration_connections_connectionId_active_resynchronization_tasks
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getActiveResynchronizationTasks/
 
         Args:
             connection_id: MetaApi account id to return tasks for.

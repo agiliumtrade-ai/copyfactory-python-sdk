@@ -102,6 +102,45 @@ class TestConfigurationClient:
 
     @respx.mock
     @pytest.mark.asyncio
+    async def test_retrieve_copyfactory_account_from_api(self):
+        """Should retrieve CopyFactory account from API."""
+        expected = {
+            '_id': '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            'subscriberId': 'subscriberId',
+            'name': 'Demo account',
+            'connectionId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
+            'reservedMarginFraction': 0.25,
+            'subscriptions': [
+                {
+                    'strategyId': 'ABCD',
+                    'multiplier': 1
+                }
+            ]
+        }
+        rsps = respx.get(f'{copy_factory_api_url}/users/current/configuration/accounts/' +
+                         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef') \
+            .mock(return_value=Response(200, json=expected))
+        accounts = await copy_factory_client\
+            .get_account('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/accounts/' + \
+               '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+        assert rsps.calls[0].request.method == 'GET'
+        assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
+        assert accounts == expected
+
+    @pytest.mark.asyncio
+    async def test_not_retrieve_copyfactory_account_with_account_token(self):
+        """Should not retrieve CopyFactory account from API with account token."""
+        copy_factory_client = ConfigurationClient(http_client, 'token')
+        try:
+            await copy_factory_client.get_account('test')
+        except Exception as err:
+            assert err.__str__() == 'You can not invoke get_account method, because you have connected with ' + \
+                                    'account access token. Please use API access token from ' + \
+                                    'https://app.metaapi.cloud/token page to invoke this method.'
+
+    @respx.mock
+    @pytest.mark.asyncio
     async def test_remove_copyfactory_account(self):
         """Should remove CopyFactory account via API."""
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/accounts/' +
@@ -230,6 +269,46 @@ class TestConfigurationClient:
 
     @respx.mock
     @pytest.mark.asyncio
+    async def test_retrieve_strategy_from_api(self):
+        """Should retrieve strategy from API."""
+        expected = {
+          '_id': 'ABCD',
+          'providerId': 'providerId',
+          'platformCommissionRate': 0.01,
+          'name': 'Test strategy',
+          'positionLifecycle': 'hedging',
+          'connectionId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
+          'maxTradeRisk': 0.1,
+          'stopOutRisk': {
+            'value': 0.4,
+            'startTime': '2020-08-24T00:00:00.000Z'
+          },
+          'timeSettings': {
+            'lifetimeInHours': 192,
+            'openingIntervalInMinutes': 5
+          }
+        }
+        rsps = respx.get(f'{copy_factory_api_url}/users/current/configuration/strategies/ABCD') \
+            .mock(return_value=Response(200, json=expected))
+        strategies = await copy_factory_client.get_strategy('ABCD')
+        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/strategies/ABCD'
+        assert rsps.calls[0].request.method == 'GET'
+        assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
+        assert strategies == expected
+
+    @pytest.mark.asyncio
+    async def test_not_retrieve_strategy_with_account_token(self):
+        """Should not retrieve strategy with account token."""
+        copy_factory_client = ConfigurationClient(http_client, 'token')
+        try:
+            await copy_factory_client.get_strategy('ABCD')
+        except Exception as err:
+            assert err.__str__() == 'You can not invoke get_strategy method, because you have connected with ' + \
+                                    'account access token. Please use API access token from ' + \
+                                    'https://app.metaapi.cloud/token page to invoke this method.'
+
+    @respx.mock
+    @pytest.mark.asyncio
     async def test_remove_strategy(self):
         """Should remove strategy via API."""
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/strategies/ABCD') \
@@ -285,6 +364,44 @@ class TestConfigurationClient:
             await copy_factory_client.get_portfolio_strategies()
         except Exception as err:
             assert err.__str__() == 'You can not invoke get_portfolio_strategies method, because you have connected '\
+                                    'with account access token. Please use API access token from '\
+                                    'https://app.metaapi.cloud/token page to invoke this method.'
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_retrieve_portfolio_strategy(self):
+        """Should retrieve portfolio strategy from API."""
+        expected = {
+            '_id': 'ABCD',
+            'providerId': 'providerId',
+            'platformCommissionRate': 0.01,
+            'name': 'Test strategy',
+            'members': [{
+                'strategyId': 'BCDE'
+            }],
+            'maxTradeRisk': 0.1,
+            'stopOutRisk': {
+                'value': 0.4,
+                'startTime': '2020-08-24T00:00:00.000Z'
+            }
+        }
+        rsps = respx.get(f'{copy_factory_api_url}/users/current/configuration/portfolio-strategies/ABCD') \
+            .mock(return_value=Response(200, json=expected))
+        strategies = await copy_factory_client.get_portfolio_strategy('ABCD')
+        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/' \
+                                            f'portfolio-strategies/ABCD'
+        assert rsps.calls[0].request.method == 'GET'
+        assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
+        assert strategies == expected
+
+    @pytest.mark.asyncio
+    async def test_not_retrieve_portfolio_strategy_with_account_token(self):
+        """Should not retrieve portfolio strategy from API with account token."""
+        copy_factory_client = ConfigurationClient(http_client, 'token')
+        try:
+            await copy_factory_client.get_portfolio_strategy('ABCD')
+        except Exception as err:
+            assert err.__str__() == 'You can not invoke get_portfolio_strategy method, because you have connected '\
                                     'with account access token. Please use API access token from '\
                                     'https://app.metaapi.cloud/token page to invoke this method.'
 

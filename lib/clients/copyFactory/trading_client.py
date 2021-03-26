@@ -8,7 +8,7 @@ from ...models import date, format_date
 
 class TradingClient(MetaApiClient):
     """metaapi.cloud CopyFactory history API (trade copying history API) client (see
-    https://trading-api-v1.project-stock.agiliumlabs.cloud/swagger/#/)"""
+    https://metaapi.cloud/docs/copyfactory/)"""
 
     def __init__(self, http_client, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
         """Inits CopyFactory history API client instance.
@@ -23,8 +23,7 @@ class TradingClient(MetaApiClient):
 
     async def resynchronize(self, account_id: str, strategy_ids: List[str] = None) -> Response:
         """Resynchronizes the account. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /post_users_current_accounts_accountId_resynchronize
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/resynchronize/
 
         Args:
             account_id: Account id.
@@ -50,8 +49,7 @@ class TradingClient(MetaApiClient):
 
     async def get_stopouts(self, account_id: str) -> 'Response[List[CopyFactoryStrategyStopout]]':
         """Returns subscriber account stopouts. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default
-        /get_users_current_accounts_accountId_stopouts
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getStopOuts/
 
         Args:
             account_id: Account id.
@@ -72,8 +70,7 @@ class TradingClient(MetaApiClient):
 
     async def reset_stopouts(self, account_id: str, strategy_id: str, reason: str) -> Response:
         """Resets strategy stopouts. See
-        https://trading-api-v1.agiliumtrade.agiliumtrade.ai/swagger/#!/default/post_users_current_accounts_accountId_
-        strategies_subscribed_strategyId_stopouts_reason_reset
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/resetStopOuts/
 
 
         Args:
@@ -100,8 +97,7 @@ class TradingClient(MetaApiClient):
     async def get_user_log(self, account_id: str, start_time: datetime = None, end_time: datetime = None,
                            offset: int = 0, limit: int = 1000) -> 'Response[List[CopyFactoryUserLogRecord]]':
         """Returns copy trading user log for an account and time range. See
-        https://trading-api-v1.project-stock.v2.agiliumlabs.cloud/swagger/#!/default
-        /get_users_current_accounts_accountId_user_log
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getUserLog/
 
 
         Args:
