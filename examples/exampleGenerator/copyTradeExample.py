@@ -1,7 +1,7 @@
 import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
-from metaapi_cloud_copyfactory_sdk import CopyFactory
+from metaapi_cloud_sdk import CopyFactory
 
 # your MetaApi API token
 token = os.getenv('TOKEN') or '<put in your token here>'
