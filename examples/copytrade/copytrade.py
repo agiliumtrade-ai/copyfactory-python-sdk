@@ -1,14 +1,14 @@
 import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
-from metaapi_cloud_copyfactory_sdk import CopyFactory
+from metaapi_cloud_sdk import CopyFactory
 
 # your MetaApi API token
 token = os.getenv('TOKEN') or '<put in your token here>'
 # your master MetaApi account id
-master_account_id = os.getenv('MASTER_ACCOUNT_ID') or '<put in your account id here>'
+master_account_id = os.getenv('MASTER_ACCOUNT_ID') or '<put in your masterAccountId here>'
 # your slave MetaApi account id
-slave_account_id = os.getenv('SLAVE_ACCOUNT_ID') or '<put in your account id here>'
+slave_account_id = os.getenv('SLAVE_ACCOUNT_ID') or '<put in your slaveAccountId here>'
 
 
 async def configure_copyfactory():
