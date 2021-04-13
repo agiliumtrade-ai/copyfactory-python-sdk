@@ -2,17 +2,21 @@ from .httpClient import HttpClient
 import re
 import pytest
 import respx
-import asyncio
-from httpx import Response, ConnectTimeout, Request
-from .errorHandler import ApiException
-httpClient = None
+from datetime import datetime
+import json
+from httpx import Response
+from ..models import format_date
+httpClient: HttpClient = None
 test_url = 'http://example.com'
+opts = {}
 
 
 @pytest.fixture(autouse=True)
 async def run_around_tests():
     global httpClient
-    httpClient = HttpClient(retry_opts={'minDelayInSeconds': 0.05, 'maxDelayInSeconds': 0.2})
+    httpClient = HttpClient()
+    global opts
+    opts = {'url': test_url}
     yield
 
 
@@ -20,9 +24,6 @@ class TestHttpClient:
     @pytest.mark.asyncio
     async def test_load(self):
         """Should load HTML page from example.com"""
-        opts = {
-            'url': test_url
-        }
         response = await httpClient.request(opts)
         text = response.text
         assert re.search('doctype html', text)
@@ -43,9 +44,6 @@ class TestHttpClient:
     async def test_timeout(self):
         """Should return ConnectTimeout exception if request is timed out"""
         httpClient = HttpClient(0.001, {'retries': 2, 'minDelayInSeconds': 0.05, 'maxDelayInSeconds': 0.2})
-        opts = {
-            'url': test_url
-        }
         try:
             await httpClient.request(opts)
             raise Exception('ConnectTimeout is expected')
@@ -54,92 +52,48 @@ class TestHttpClient:
 
     @respx.mock
     @pytest.mark.asyncio
-    async def test_validation_exception(self):
-        """Should return a validation exception"""
-        error = {
-            'id': 1,
-            'error': 'error',
-            'message': 'test message',
-        }
-        respx.post(test_url).mock(return_value=Response(400, json=error))
-        opts = {
-            'method': 'POST',
-            'url': test_url
-        }
-        try:
-            await httpClient.request(opts)
-            raise Exception('ValidationException is expected')
-        except Exception as err:
-            assert err.__class__.__name__ == 'ValidationException'
-            assert err.__str__() == 'test message, check error.details for more information'
-
-    @respx.mock
-    @pytest.mark.asyncio
-    async def test_validation_exception_details(self):
-        """Should return a validation exception with details"""
-        error = {
-            'id': 1,
-            'error': 'error',
-            'message': 'test',
-            'details': [{'parameter': 'password', 'value': 'wrong', 'message': 'Invalid value'}]
-        }
-        respx.post(test_url).mock(return_value=Response(400, json=error))
-        opts = {
-            'method': 'POST',
-            'url': test_url
-        }
-        try:
-            await httpClient.request(opts)
-            raise Exception('ValidationException is expected')
-        except Exception as err:
-            assert err.__class__.__name__ == 'ValidationException'
-            assert err.__str__() == 'test, check error.details for more information'
-            assert err.details == error['details']
-
-    @respx.mock
-    @pytest.mark.asyncio
-    async def test_retry_on_fail(self):
-        """Should retry request on fail."""
-        opts = {
-            'method': 'POST',
-            'url': test_url
-        }
-        respx.post(test_url).mock(side_effect=[ConnectTimeout('test', request=Request('GET', opts['url'])),
-                                               ConnectTimeout('test', request=Request('GET', opts['url'])),
-                                               Response(200, text='response')])
+    async def test_retry_on_api_exception(self):
+        """Should retry request on fail with ApiException exception."""
+        respx.get(test_url).mock(side_effect=[Response(502), Response(502),
+                                              Response(200, content=json.dumps('response'))])
         response = await httpClient.request(opts)
-        assert response.text == 'response'
+        assert response == 'response'
+        assert respx.get(test_url).call_count == 3
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_retry_on_internal_exception(self):
+        """Should retry request on fail with InternalException exception."""
+        respx.get(test_url).mock(side_effect=[Response(500), Response(500),
+                                              Response(200, content=json.dumps('response'))])
+        response = await httpClient.request(opts)
+        assert response == 'response'
+        assert respx.get(test_url).call_count == 3
 
     @respx.mock
     @pytest.mark.asyncio
     async def test_return_error_on_retry_limit_exceeded(self):
         """Should return error if retry limit exceeded."""
-        opts = {
-            'method': 'POST',
-            'url': test_url
-        }
-        respx.post(test_url).mock(side_effect=ConnectTimeout)
+        respx.get(test_url).mock(side_effect=Response(502))
+        httpClient = HttpClient(60, {'retries': 2})
         try:
             await httpClient.request(opts)
-            raise Exception('ConnectTimeout is expected')
+            raise Exception('ApiException is expected')
         except Exception as err:
-            assert err.__class__.__name__ == 'ConnectTimeout'
+            assert err.__class__.__name__ == 'ApiException'
+        assert respx.get(test_url).call_count == 3
 
     @respx.mock
     @pytest.mark.asyncio
-    async def test_not_retry_if_error_not_specified(self):
-        """Should not retry if error not specified."""
+    async def test_not_retry_if_exception_not_internal_exception_or_api_exception(self):
+        """Should not retry if exception is neither InternalException nor ApiException."""
         error = {
             'id': 1,
             'error': 'error',
             'message': 'test',
             'details': [{'parameter': 'password', 'value': 'wrong', 'message': 'Invalid value'}]
         }
-        respx.post(test_url).mock(side_effect=[Response(400, json=error), Response(400, json=error), Response(204)])
-        opts = {
-            'method': 'POST',
-            'url': test_url
-        }
+        respx.get(test_url).mock(side_effect=[Response(400, json=error), Response(400, json=error), Response(204)])
         try:
             await httpClient.request(opts)
             raise Exception('ValidationException is expected')
@@ -147,3 +101,90 @@ class TestHttpClient:
             assert err.__class__.__name__ == 'ValidationException'
             assert err.__str__() == 'test, check error.details for more information'
             assert err.details == error['details']
+        assert respx.get(test_url).call_count == 1
+
+    def get_too_many_requests_error(self, sec):
+        date = datetime.now().timestamp()
+        date += sec
+        recommended_retry_time = format_date(datetime.fromtimestamp(date))
+        return Response(429, content=json.dumps({"metadata": {"recommendedRetryTime": recommended_retry_time}}))
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_retry_after_wait_on_too_many_requests_error(self):
+        """Should retry request after waiting on fail with TooManyRequestsException error."""
+        respx.get(test_url).mock(side_effect=[self.get_too_many_requests_error(2),
+                                              self.get_too_many_requests_error(3),
+                                              Response(200, content=json.dumps('response'))])
+        response = await httpClient.request(opts)
+        assert response == 'response'
+        assert respx.get(test_url).call_count == 3
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_return_error_if_recommended_time_too_long(self):
+        """Should return error if recommended retry time is too long."""
+        respx.get(test_url).mock(side_effect=[self.get_too_many_requests_error(2),
+                                              self.get_too_many_requests_error(300),
+                                              Response(200, content=json.dumps('response'))])
+        try:
+            await httpClient.request(opts)
+            raise Exception('TooManyRequestsException is expected')
+        except Exception as err:
+            assert err.__class__.__name__ == 'TooManyRequestsException'
+        assert respx.get(test_url).call_count == 2
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_not_count_retrying_too_many_requests_exception(self):
+        """Should not count retrying TooManyRequestsException error."""
+        respx.get(test_url).mock(side_effect=[self.get_too_many_requests_error(2), Response(502),
+                                              Response(200, content=json.dumps('response'))])
+        httpClient = HttpClient(60, {'retries': 1})
+        response = await httpClient.request(opts)
+        assert response == 'response'
+        assert respx.get(test_url).call_count == 3
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_wait_for_retry_after_header(self):
+        """Should wait for the retry-after header time before retrying."""
+        httpClient = HttpClient()
+        respx.get(test_url).mock(side_effect=[
+            Response(202, headers={'retry-after': '3'}),
+            Response(202, headers={'retry-after': '3'}),
+            Response(200, content=json.dumps('response'))])
+        response = await httpClient.request(opts)
+        assert response == 'response'
+        assert respx.get(test_url).call_count == 3
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_return_error_if_retry_after_time_too_long(self):
+        """Should return TimeoutException error if retry-after header time is too long."""
+        httpClient = HttpClient(60, {'maxDelayInSeconds': 3})
+        respx.get(test_url).mock(side_effect=[
+            Response(202, headers={'retry-after': '30'}),
+            Response(202, headers={'retry-after': '30'}),
+            Response(200, content=json.dumps('response'))])
+        try:
+            await httpClient.request(opts)
+            raise Exception('TimeoutException is expected')
+        except Exception as err:
+            assert err.__class__.__name__ == 'TimeoutException'
+            assert err.args[0] == 'Timed out waiting for the end of the process of calculating metrics'
+        assert respx.get(test_url).call_count == 1
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_return_error_if_timed_out_to_retry(self):
+        """Should return TimeoutException error if timed out to retry."""
+        respx.get(test_url).mock(side_effect=Response(202, headers={'retry-after': '1'}))
+        httpClient = HttpClient(60, {'maxDelayInSeconds': 2, 'retries': 3})
+        try:
+            await httpClient.request(opts)
+            raise Exception('TimeoutException is expected')
+        except Exception as err:
+            assert err.__class__.__name__ == 'TimeoutException'
+            assert err.args[0] == 'Timed out waiting for the end of the process of calculating metrics'
+        assert respx.get(test_url).call_count == 6

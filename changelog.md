@@ -1,3 +1,6 @@
+1.1.1
+  - handle TooManyRequestsException in HTTP client
+
 1.1.0
   - Added API to retrieve account / strategy / portfolio strategy by id
 
