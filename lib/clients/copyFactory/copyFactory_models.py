@@ -75,7 +75,7 @@ class CopyFactoryStrategyBreakingNewsFilter(TypedDict):
     """List of breaking news priorities to stop trading on, leave empty to disable breaking news filter. One of high,
     medium, low."""
     closePositionTimeGapInMinutes: Optional[float]
-    """Optional time interval specifying when to force close an already open position before calendar news. Default
+    """Optional time interval specifying when to force close an already open position after breaking news. Default
     value is 60 minutes."""
     openPositionFollowingTimeGapInMinutes: Optional[float]
     """Optional time interval specifying when it is allowed to open position after calendar news. Default value is
@@ -130,6 +130,22 @@ class CopyFactoryStrategyRiskLimit(TypedDict):
     the filter after stopout event."""
 
 
+class CopyFactoryStrategyTradeSizeScaling(TypedDict):
+    """CopyFactory strategy trade size scaling settings."""
+    mode: str
+    """If set to balance, the trade size on strategy subscriber will be scaled according to
+    balance to preserve risk. If value is none, then trade size will be preserved irregardless of the subscriber
+    balance. If value is contractSize, then trade size will be scaled according to contract size. If fixedVolume is
+    set, then trade will be copied with a fixed volume of traceVolume setting. If fixedRisk is set, then each trade
+    will be copied with a trade volume set to risk specific fraction of balance as configured by riskFraction setting.
+    Note, that in fixedRisk mode trades without a SL are not copied. Default is balance. Allowed values: none,
+    contractSize, balance, fixedVolume, fixedRisk."""
+    tradeVolume: Optional[float]
+    """Fixed trade volume for use with fixedVolume trade size scaling mode."""
+    riskFraction: Optional[float]
+    """Fixed risk fraction for use with fixedRisk trade size scaling mode."""
+
+
 class CopyFactoryStrategySubscription(TypedDict):
     """CopyFactory strategy subscriptions."""
     strategyId: str
@@ -170,10 +186,17 @@ class CopyFactoryStrategySubscription(TypedDict):
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
     suffixes). By default this setting is disabled and the trades are copied using signal source symbol name."""
-    tradeSizeScalingMode: Optional[str]
-    """If set to balance, the trade size on strategy subscriber will be scaled according to balance to preserve risk.
-    If value is none, then trade size will be preserved irregardless of the subscriber balance. If value is
-    contractSize, then trade size will be scaled according to contract size. Default is balance."""
+    tradeSizeScaling: Optional[CopyFactoryStrategyTradeSizeScaling]
+    """Trade size scaling settings. By default the trade size on strategy subscriber side will be scaled according
+    to balance to preserve risk."""
+    copyStopLoss: Optional[bool]
+    """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
+    copyTakeProfit: Optional[bool]
+    """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    minTradeVolume: Optional[float]
+    """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
+    maxTradeVolume: Optional[float]
+    """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
 
 
 class CopyFactoryAccountUpdate(TypedDict):
@@ -206,6 +229,14 @@ class CopyFactoryAccountUpdate(TypedDict):
     maxLeverage: Optional[float]
     """Optional setting indicating maxumum leverage allowed when opening a new positions. Any trade which results in a
     higher leverage will be discarded."""
+    copyStopLoss: Optional[bool]
+    """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
+    copyTakeProfit: Optional[bool]
+    """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    minTradeVolume: Optional[float]
+    """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
+    maxTradeVolume: Optional[float]
+    """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
     subscriptions: List[CopyFactoryStrategySubscription]
     """Strategy subscriptions."""
 
@@ -304,12 +335,19 @@ class CopyFactoryStrategyUpdate(TypedDict):
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
     suffixes). By default this setting is disabled and the trades are copied using signal source symbol name."""
-    tradeSizeScalingMode: Optional[str]
-    """If set to balance, the trade size on strategy subscriber will be scaled according to balance to preserve risk.
-    If value is none, then trade size will be preserved irregardless of the subscriber balance. If value is
-    contractSize, then trade size will be scaled according to contract size. Default is balance."""
+    tradeSizeScaling: Optional[CopyFactoryStrategyTradeSizeScaling]
+    """Trade size scaling settings. By default the trade size on strategy subscriber side will be scaled according
+    to balance to preserve risk."""
     equityCurveFilter: CopyFactoryStrategyEquityCurveFilter
     """Filter which permits the trades only if account equity is greater than balance moving average."""
+    copyStopLoss: Optional[bool]
+    """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
+    copyTakeProfit: Optional[bool]
+    """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    minTradeVolume: Optional[float]
+    """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
+    maxTradeVolume: Optional[float]
+    """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
 
 
 class CopyFactorySubscriberOrProvider(TypedDict):
@@ -441,10 +479,17 @@ class CopyFactoryPortfolioMember(TypedDict):
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
     suffixes). By default this setting is disabled and the trades are copied using signal source symbol name."""
-    tradeSizeScalingMode: Optional[str]
-    """If set to balance, the trade size on strategy subscriber will be scaled according to balance to preserve risk.
-    If value is none, then trade size will be preserved irregardless of the subscriber balance. If value is
-    contractSize, then trade size will be scaled according to contract size. Default is balance."""
+    tradeSizeScaling: Optional[CopyFactoryStrategyTradeSizeScaling]
+    """Trade size scaling settings. By default the trade size on strategy subscriber side will be scaled according
+    to balance to preserve risk."""
+    copyStopLoss: Optional[bool]
+    """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
+    copyTakeProfit: Optional[bool]
+    """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    minTradeVolume: Optional[float]
+    """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
+    maxTradeVolume: Optional[float]
+    """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
 
 
 class CopyFactoryPortfolioStrategyUpdate(TypedDict):
@@ -487,10 +532,17 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
     suffixes). By default this setting is disabled and the trades are copied using signal source symbol name."""
-    tradeSizeScalingMode: Optional[str]
-    """If set to balance, the trade size on strategy subscriber will be scaled according to balance to preserve risk.
-    If value is none, then trade size will be preserved irregardless of the subscriber balance. If value is
-    contractSize, then trade size will be scaled according to contract size. Default is balance."""
+    tradeSizeScaling: Optional[CopyFactoryStrategyTradeSizeScaling]
+    """Trade size scaling settings. By default the trade size on strategy subscriber side will be scaled according
+    to balance to preserve risk."""
+    copyStopLoss: Optional[bool]
+    """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
+    copyTakeProfit: Optional[bool]
+    """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    minTradeVolume: Optional[float]
+    """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
+    maxTradeVolume: Optional[float]
+    """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
 
 
 class CopyFactoryPortfolioStrategy(CopyFactoryPortfolioStrategyUpdate):
