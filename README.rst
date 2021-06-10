@@ -54,6 +54,9 @@ Features supported:
 
 Please note that trade copying to MT5 netting accounts is not supported in the current API version
 
+Please check Features section of the `https://metaapi.cloud/docs/copyfactory/ <https://metaapi.cloud/docs/copyfactory/>`_
+documentation for detailed description of all settings you can make.
+
 REST API documentation
 ======================
 
@@ -73,7 +76,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install metaapi-cloud-copyfactory-sdk
+    pip install metaapi-cloud-sdk
 
 Retrieving API token
 ====================
@@ -92,8 +95,7 @@ In order to configure trade copying you need to:
 
 .. code-block:: python
 
-    from metaapi_cloud_sdk import MetaApi
-    from metaapi_cloud_copyfactory_sdk import CopyFactory
+    from metaapi_cloud_sdk import MetaApi, CopyFactory
 
     token = '...'
     metaapi = MetaApi(token=token)
