@@ -30,21 +30,39 @@ async def configure_copyfactory():
                             'account in order to use it in CopyFactory API')
 
         configuration_api = copy_factory.configuration_api
-        master_account_id = configuration_api.generate_account_id()
-        slave_account_id = configuration_api.generate_account_id()
+        copyfactory_accounts = await configuration_api.get_accounts()
+        master_account = next((a for a in copyfactory_accounts if a['connectionId'] == master_metaapi_account.id),
+                              None)
+        if master_account:
+            master_account_id = master_account['_id']
+        else:
+            master_account_id = configuration_api.generate_account_id()
         await configuration_api.update_account(master_account_id, {
             'name': 'Demo master account',
             'connectionId': master_metaapi_account.id,
             'subscriptions': []
         })
 
+        strategies = await configuration_api.get_strategies()
+        strategy = next((a for a in strategies if a['connectionId'] == master_metaapi_account.id),
+                        None)
+        if strategy:
+            strategy_id = strategy['_id']
+        else:
+            strategy_id = await configuration_api.generate_strategy_id()
+            strategy_id = strategy_id['id']
+
         # create a strategy being copied
-        strategy_id = await configuration_api.generate_strategy_id()
-        await configuration_api.update_strategy(strategy_id['id'], {
+        await configuration_api.update_strategy(strategy_id, {
             'name': 'Test strategy',
             'description': 'Some useful description about your strategy',
             'connectionId': master_metaapi_account.id
         })
+        slave_account = next((a for a in copyfactory_accounts if a['connectionId'] == slave_metaapi_account.id),
+                             None)
+        if slave_account:
+            await configuration_api.remove_account(slave_account['_id'])
+        slave_account_id = configuration_api.generate_account_id()
 
         # subscribe slave CopyFactory accounts to the strategy
         await configuration_api.update_account(slave_account_id, {
@@ -52,7 +70,7 @@ async def configure_copyfactory():
             'connectionId': slave_metaapi_account.id,
             'subscriptions': [
                 {
-                    'strategyId': strategy_id['id'],
+                    'strategyId': strategy_id,
                     'multiplier': 1
                 }
             ]
