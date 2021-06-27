@@ -247,15 +247,6 @@ class CopyFactoryAccount(CopyFactoryAccountUpdate):
     """Account unique identifier."""
 
 
-class CopyFactoryStrategy(TypedDict):
-    """CopyFactory provider strategy"""
-    _id: str
-    """Unique strategy id."""
-    platformCommissionRate: float
-    """Commission rate the platform charges for strategy copying, applied to commissions charged by provider. This
-    commission applies only to accounts not managed directly by provider. Should be a fraction of 1."""
-
-
 class CopyFactoryStrategyCommissionScheme(TypedDict):
     """CopyFactory strategy commission scheme."""
     type: str
@@ -300,9 +291,6 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Optional flag indicating that pending orders should not be copied. Default is to copy pending orders"""
     commissionScheme: Optional[CopyFactoryStrategyCommissionScheme]
     """Commission scheme allowed by this strategy."""
-    platformCommissionRate: float
-    """Commission rate the platform charges for strategy copying, applied to commissions charged by provider. This
-    commission applies only to accounts not managed directly by provider. Should be fraction of 1."""
     maxTradeRisk: Optional[float]
     """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted to
     match the risk limit. If not, the trade SL will be applied according to the risk limit."""
@@ -348,6 +336,15 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+
+
+class CopyFactoryStrategy(CopyFactoryStrategyUpdate):
+    """CopyFactory provider strategy"""
+    _id: str
+    """Unique strategy id."""
+    platformCommissionRate: float
+    """Commission rate the platform charges for strategy copying, applied to commissions charged by provider. This
+    commission applies only to accounts not managed directly by provider. Should be fraction of 1."""
 
 
 class CopyFactorySubscriberOrProvider(TypedDict):
