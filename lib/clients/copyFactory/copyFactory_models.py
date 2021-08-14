@@ -46,6 +46,17 @@ class CopyFactoryStrategyEquityCurveFilter(TypedDict):
     Allowed units are s, m, h, d and w."""
 
 
+class CopyFactoryStrategyDrawdownFilter(TypedDict):
+    """CopyFactory strategy drawdown filter."""
+    maxDrawdown: float
+    """Maximum drawdown value after which action is executed. Drawdown should be configured as a fraction
+    of 1, i.e. 0.15 means 15% drawdown value."""
+    action: str
+    """Action to take when drawdown exceeds maxDrawdown value. include means the trading signal
+    will be transmitted only if dd is greater than maxDrawdown value. exclude means the trading signal will be
+    transmitted only if dd is less than maxDrawdown value."""
+
+
 class StrategyId(TypedDict):
     """Strategy id"""
     id: str
@@ -166,8 +177,8 @@ class CopyFactoryStrategySubscription(TypedDict):
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
-    specified (disable correlation risk restrictions), by-strategy (limit correlations on strategy level) or by-symbol
-    (limit correlations on symbol level)."""
+    specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
+    (limit correlations for the account)."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
     """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
     this value."""
@@ -298,8 +309,8 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
-    specified (disable correlation risk restrictions), by-strategy (limit correlations on strategy level) or by-symbol
-    (limit correlations on symbol level)."""
+    specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
+    (limit correlations for the account)."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
     """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
     this value."""
@@ -326,7 +337,7 @@ class CopyFactoryStrategyUpdate(TypedDict):
     tradeSizeScaling: Optional[CopyFactoryStrategyTradeSizeScaling]
     """Trade size scaling settings. By default the trade size on strategy subscriber side will be scaled according
     to balance to preserve risk."""
-    equityCurveFilter: CopyFactoryStrategyEquityCurveFilter
+    equityCurveFilter: Optional[CopyFactoryStrategyEquityCurveFilter]
     """Filter which permits the trades only if account equity is greater than balance moving average."""
     copyStopLoss: Optional[bool]
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
@@ -336,6 +347,8 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    drawdownFilter: Optional[CopyFactoryStrategyDrawdownFilter]
+    """Master account strategy drawdown filter."""
 
 
 class CopyFactoryStrategy(CopyFactoryStrategyUpdate):
@@ -456,8 +469,8 @@ class CopyFactoryPortfolioMember(TypedDict):
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are
-    not specified (disable correlation risk restrictions), by-strategy (limit correlations on strategy level) or
-    by-symbol (limit correlations on symbol level)."""
+    not specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or
+    by-account (limit correlations for the account)."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
     """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
     value."""
@@ -509,8 +522,8 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
-    specified (disable correlation risk restrictions), by-strategy (limit correlations on strategy level) or by-symbol
-    (limit correlations on symbol level)."""
+    specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
+    (limit correlations for the account)."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
     """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
     value."""
