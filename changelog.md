@@ -1,3 +1,6 @@
+3.0.0
+  - breaking change: migrated to CopyFactory 2
+
 2.2.0
   - added drawdown filter
   - changed reduceCorrelations filter allowed values
