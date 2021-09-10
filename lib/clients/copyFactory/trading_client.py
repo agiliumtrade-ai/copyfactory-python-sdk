@@ -1,9 +1,11 @@
 from ..metaApi_client import MetaApiClient
-from .copyFactory_models import CopyFactoryStrategyStopout, CopyFactoryUserLogRecord
+from .copyFactory_models import CopyFactoryStrategyStopout, CopyFactoryUserLogMessage, \
+    CopyFactoryExternalSignalUpdate, CopyFactoryExternalSignalRemove, CopyFactoryTradingSignal
 from typing import List
 from httpx import Response
 from datetime import datetime
-from ...models import date, format_date
+from copy import deepcopy
+from ...models import format_date, convert_iso_time_to_date, format_request, random_id
 
 
 class TradingClient(MetaApiClient):
@@ -19,15 +21,78 @@ class TradingClient(MetaApiClient):
             domain: Domain to connect to, default is agiliumtrade.agiliumtrade.ai.
         """
         super().__init__(http_client, token, domain)
-        self._host = f'https://trading-api-v1.{domain}'
+        self._host = f'https://copyfactory-application-history-master-v1.{domain}'
 
-    async def resynchronize(self, account_id: str, strategy_ids: List[str] = None) -> Response:
+    @staticmethod
+    def generate_signal_id():
+        """Generates random signal id.
+
+        Returns:
+            Signal id.
+        """
+        return random_id(8)
+
+    async def update_external_signal(self, strategy_id: str, signal_id: str, signal: CopyFactoryExternalSignalUpdate):
+        """Updates external signal for a strategy. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/updateSignal/
+
+        Args:
+            strategy_id: Strategy id.
+            signal_id: External signal id
+            signal: Signal update payload.
+
+        Returns:
+            A coroutine which resolves when external signal is updated.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('update_external_signal')
+        payload: dict = deepcopy(signal)
+        format_request(payload)
+        opts = {
+            'url': f"{self._host}/users/current/strategies/{strategy_id}/external-signals/{signal_id}",
+            'method': 'PUT',
+            'headers': {
+                'auth-token': self._token
+            },
+            'body': payload
+        }
+        return await self._httpClient.request(opts)
+
+    async def remove_external_signal(self, strategy_id: str, signal_id: str, signal: CopyFactoryExternalSignalRemove):
+        """Removes (closes) external signal for a strategy. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/removeSignal/
+
+        Args:
+            strategy_id: Strategy id.
+            signal_id: External signal id
+            signal: Signal removal payload.
+
+        Returns:
+            A coroutine which resolves when external signal is removed.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('remove_external_signal')
+        payload: dict = deepcopy(signal)
+        format_request(payload)
+        opts = {
+            'url': f"{self._host}/users/current/strategies/{strategy_id}/external-signals/{signal_id}/remove",
+            'method': 'POST',
+            'headers': {
+                'auth-token': self._token
+            },
+            'body': payload
+        }
+        return await self._httpClient.request(opts)
+
+    async def resynchronize(self, subscriber_id: str, strategy_ids: List[str] = None,
+                            position_ids: List[str] = None) -> Response:
         """Resynchronizes the account. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/trading/resynchronize/
 
         Args:
-            account_id: Account id.
-            strategy_ids: Optional array of strategy ids to recynchronize. Default is to synchronize all strategies.
+            subscriber_id: Account id.
+            strategy_ids: Optional array of strategy ids to resynchronize. Default is to synchronize all strategies.
+            position_ids: Optional array of position ids to resynchronize. Default is to synchronize all positions.
 
         Returns:
             A coroutine which resolves when resynchronization is scheduled.
@@ -37,8 +102,10 @@ class TradingClient(MetaApiClient):
         qs = {}
         if strategy_ids:
             qs['strategyId'] = strategy_ids
+        if position_ids:
+            qs['positionId'] = position_ids
         opts = {
-          'url': f'{self._host}/users/current/accounts/{account_id}/resynchronize',
+          'url': f'{self._host}/users/current/subscribers/{subscriber_id}/resynchronize',
           'method': 'POST',
           'headers': {
             'auth-token': self._token
@@ -47,12 +114,35 @@ class TradingClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
-    async def get_stopouts(self, account_id: str) -> 'Response[List[CopyFactoryStrategyStopout]]':
+    async def get_trading_signals(self, subscriber_id: str) -> 'List[CopyFactoryTradingSignal]':
+        """Returns trading signals the subscriber is subscribed to. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getSignals/
+
+        Args:
+            subscriber_id: Subscriber id.
+
+        Returns:
+            A coroutine which resolves with signals found.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('get_signals')
+        opts = {
+            'url': f'{self._host}/users/current/subscribers/{subscriber_id}/signals',
+            'method': 'GET',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        result = await self._httpClient.request(opts)
+        convert_iso_time_to_date(result)
+        return result
+
+    async def get_stopouts(self, subscriber_id: str) -> 'List[CopyFactoryStrategyStopout]':
         """Returns subscriber account stopouts. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getStopOuts/
 
         Args:
-            account_id: Account id.
+            subscriber_id: Account id.
 
         Returns:
             A coroutine which resolves with stopouts found.
@@ -60,21 +150,22 @@ class TradingClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('get_stopouts')
         opts = {
-            'url': f'{self._host}/users/current/accounts/{account_id}/stopouts',
+            'url': f'{self._host}/users/current/subscribers/{subscriber_id}/stopouts',
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             }
         }
-        return await self._httpClient.request(opts)
+        result = await self._httpClient.request(opts)
+        convert_iso_time_to_date(result)
+        return result
 
-    async def reset_stopouts(self, account_id: str, strategy_id: str, reason: str) -> Response:
+    async def reset_stopouts(self, subscriber_id: str, strategy_id: str, reason: str) -> Response:
         """Resets strategy stopouts. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/trading/resetStopOuts/
 
-
         Args:
-            account_id: Account id.
+            subscriber_id: Account id.
             strategy_id: Strategy id.
             reason: Stopout reason to reset. One of yearly-balance, monthly-balance, daily-balance, yearly-equity,
             monthly-equity, daily-equity, max-drawdown.
@@ -85,7 +176,7 @@ class TradingClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('reset_stopouts')
         opts = {
-            'url': f'{self._host}/users/current/accounts/{account_id}/strategies-subscribed/{strategy_id}' +
+            'url': f'{self._host}/users/current/subscribers/{subscriber_id}/subscription-strategies/{strategy_id}' +
                    f'/stopouts/{reason}/reset',
             'method': 'POST',
             'headers': {
@@ -94,14 +185,13 @@ class TradingClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
-    async def get_user_log(self, account_id: str, start_time: datetime = None, end_time: datetime = None,
-                           offset: int = 0, limit: int = 1000) -> 'Response[List[CopyFactoryUserLogRecord]]':
-        """Returns copy trading user log for an account and time range. See
+    async def get_user_log(self, subscriber_id: str, start_time: datetime = None, end_time: datetime = None,
+                           offset: int = 0, limit: int = 1000) -> 'List[CopyFactoryUserLogMessage]':
+        """Returns copy trading user log for an account and time range, sorted in reverse chronological order. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getUserLog/
 
-
         Args:
-            account_id: Account id.
+            subscriber_id: Subscriber id.
             start_time: Time to start loading data from.
             end_time: Time to stop loading data at.
             offset: Pagination offset. Default is 0.
@@ -121,7 +211,7 @@ class TradingClient(MetaApiClient):
         if end_time:
             qs['endTime'] = format_date(end_time)
         opts = {
-            'url': f'{self._host}/users/current/accounts/{account_id}/user-log',
+            'url': f'{self._host}/users/current/subscribers/{subscriber_id}/user-log',
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
@@ -129,7 +219,5 @@ class TradingClient(MetaApiClient):
             'params': qs
         }
         result = await self._httpClient.request(opts)
-        if result and isinstance(result, List):
-            for r in result:
-                r['time'] = date(r['time'])
+        convert_iso_time_to_date(result)
         return result

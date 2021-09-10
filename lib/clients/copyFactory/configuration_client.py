@@ -1,12 +1,10 @@
 from ..metaApi_client import MetaApiClient
-from ...models import random_id, date
-from .copyFactory_models import StrategyId, CopyFactoryAccountUpdate, CopyFactoryStrategyUpdate, \
-    ResynchronizationTask, CopyFactoryAccount, CopyFactoryStrategy, CopyFactoryPortfolioStrategy, \
+from ...models import random_id, convert_iso_time_to_date, format_request
+from .copyFactory_models import StrategyId, CopyFactoryStrategyUpdate, CopyFactorySubscriberUpdate, \
+    CopyFactorySubscriber, CopyFactoryStrategy, CopyFactoryPortfolioStrategy, \
     CopyFactoryPortfolioStrategyUpdate
-from ..timeoutException import TimeoutException
-from datetime import datetime
-import asyncio
 from typing import List
+from copy import deepcopy
 
 
 class ConfigurationClient(MetaApiClient):
@@ -22,7 +20,7 @@ class ConfigurationClient(MetaApiClient):
             domain: Domain to connect to, default is agiliumtrade.agiliumtrade.ai.
         """
         super().__init__(http_client, token, domain)
-        self._host = f'https://trading-api-v1.{domain}'
+        self._host = f'https://copyfactory-application-history-master-v1.{domain}'
 
     async def generate_strategy_id(self) -> StrategyId:
         """Retrieves new unused strategy id. Method is accessible only with API access token. See
@@ -42,96 +40,14 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
-    def generate_account_id(self) -> str:
+    @staticmethod
+    def generate_account_id() -> str:
         """Generates random account id.
 
         Returns:
             Account id.
         """
         return random_id(64)
-
-    async def get_accounts(self) -> 'List[CopyFactoryAccount]':
-        """Retrieves CopyFactory copy trading accounts. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getAccounts/
-
-        Returns:
-            A coroutine resolving with CopyFactory accounts found.
-        """
-        if self._is_not_jwt_token():
-            return self._handle_no_access_exception('get_accounts')
-        opts = {
-            'url': f"{self._host}/users/current/configuration/accounts",
-            'method': 'GET',
-            'headers': {
-                'auth-token': self._token
-            }
-        }
-        return await self._httpClient.request(opts)
-
-    async def get_account(self, account_id: str) -> CopyFactoryAccount:
-        """Retrieves CopyFactory copy trading account by id. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getAccount/
-
-        Args:
-            account_id: CopyFactory account id.
-
-        Returns:
-            A coroutine resolving with CopyFactory account found.
-        """
-        if self._is_not_jwt_token():
-            return self._handle_no_access_exception('get_account')
-        opts = {
-            'url': f"{self._host}/users/current/configuration/accounts/{account_id}",
-            'method': 'GET',
-            'headers': {
-                'auth-token': self._token
-            }
-        }
-        return await self._httpClient.request(opts)
-
-    async def update_account(self, id: str, account: CopyFactoryAccountUpdate):
-        """Updates a CopyFactory trade copying account. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/updateAccount/
-
-        Args:
-            id: Copy trading account id.
-            account: Trading account update.
-
-        Returns:
-            A coroutine resolving when account is updated.
-        """
-        if self._is_not_jwt_token():
-            return self._handle_no_access_exception('update_account')
-        opts = {
-            'url': f"{self._host}/users/current/configuration/accounts/{id}",
-            'method': 'PUT',
-            'headers': {
-                'auth-token': self._token
-            },
-            'body': account
-        }
-        return await self._httpClient.request(opts)
-
-    async def remove_account(self, id: str):
-        """Removes a CopyFactory trade copying account. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeAccount/
-
-        Args:
-            id: Copy trading account id.
-
-        Returns:
-            A coroutine resolving when account is removed.
-        """
-        if self._is_not_jwt_token():
-            return self._handle_no_access_exception('remove_account')
-        opts = {
-            'url': f"{self._host}/users/current/configuration/accounts/{id}",
-            'method': 'DELETE',
-            'headers': {
-                'auth-token': self._token
-            }
-        }
-        return await self._httpClient.request(opts)
 
     async def get_strategies(self) -> 'List[CopyFactoryStrategy]':
         """Retrieves CopyFactory copy trading strategies. See
@@ -149,7 +65,9 @@ class ConfigurationClient(MetaApiClient):
                 'auth-token': self._token
             }
         }
-        return await self._httpClient.request(opts)
+        result = await self._httpClient.request(opts)
+        convert_iso_time_to_date(result)
+        return result
 
     async def get_strategy(self, strategy_id: str) -> CopyFactoryStrategy:
         """Retrieves CopyFactory copy trading strategy by id. See
@@ -170,14 +88,16 @@ class ConfigurationClient(MetaApiClient):
                 'auth-token': self._token
             }
         }
-        return await self._httpClient.request(opts)
+        strategy = await self._httpClient.request(opts)
+        convert_iso_time_to_date(strategy)
+        return strategy
 
-    async def update_strategy(self, id: str, strategy: CopyFactoryStrategyUpdate):
+    async def update_strategy(self, strategy_id: str, strategy: CopyFactoryStrategyUpdate):
         """Updates a CopyFactory strategy. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/updateStrategy/
 
         Args:
-            id: Copy trading strategy id.
+            strategy_id: Copy trading strategy id.
             strategy: Trading strategy update.
 
         Returns:
@@ -185,22 +105,24 @@ class ConfigurationClient(MetaApiClient):
         """
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('update_strategy')
+        payload = deepcopy(strategy)
+        format_request(payload)
         opts = {
-            'url': f"{self._host}/users/current/configuration/strategies/{id}",
+            'url': f"{self._host}/users/current/configuration/strategies/{strategy_id}",
             'method': 'PUT',
             'headers': {
                 'auth-token': self._token
             },
-            'body': strategy
+            'body': payload
         }
         return await self._httpClient.request(opts)
 
-    async def remove_strategy(self, id: str):
-        """Removes a CopyFactory strategy. See
+    async def remove_strategy(self, strategy_id: str):
+        """Deletes a CopyFactory strategy. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeStrategy/
 
         Args:
-            id: Copy trading strategy id.
+            strategy_id: Copy trading strategy id.
 
         Returns:
             A coroutine resolving when strategy is removed.
@@ -208,7 +130,7 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('remove_strategy')
         opts = {
-            'url': f"{self._host}/users/current/configuration/strategies/{id}",
+            'url': f"{self._host}/users/current/configuration/strategies/{strategy_id}",
             'method': 'DELETE',
             'headers': {
                 'auth-token': self._token
@@ -232,10 +154,12 @@ class ConfigurationClient(MetaApiClient):
                 'auth-token': self._token
             }
         }
-        return await self._httpClient.request(opts)
+        result = await self._httpClient.request(opts)
+        convert_iso_time_to_date(result)
+        return result
 
     async def get_portfolio_strategy(self, portfolio_id: str) -> CopyFactoryPortfolioStrategy:
-        """Retrieves CopyFactory copy portfolio strategies. See
+        """Retrieves a CopyFactory copy portfolio strategy by id. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getPortfolioStrategy/
 
         Args:
@@ -253,37 +177,41 @@ class ConfigurationClient(MetaApiClient):
                 'auth-token': self._token
             }
         }
-        return await self._httpClient.request(opts)
+        strategy = await self._httpClient.request(opts)
+        convert_iso_time_to_date(strategy)
+        return strategy
 
-    async def update_portfolio_strategy(self, id: str, strategy: CopyFactoryPortfolioStrategyUpdate):
+    async def update_portfolio_strategy(self, portfolio_id: str, portfolio: CopyFactoryPortfolioStrategyUpdate):
         """Updates a CopyFactory portfolio strategy. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/updatePortfolioStrategy/
 
         Args:
-            id: Copy trading portfolio strategy id.
-            strategy: Portfolio strategy update.
+            portfolio_id: Copy trading portfolio strategy id.
+            portfolio: Portfolio strategy update.
 
         Returns:
             A coroutine resolving when portfolio strategy is updated.
         """
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('update_portfolio_strategy')
+        payload = deepcopy(portfolio)
+        format_request(payload)
         opts = {
-            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{id}",
+            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}",
             'method': 'PUT',
             'headers': {
                 'auth-token': self._token
             },
-            'body': strategy
+            'body': payload
         }
         return await self._httpClient.request(opts)
 
-    async def remove_portfolio_strategy(self, id: str):
+    async def remove_portfolio_strategy(self, portfolio_id: str):
         """Deletes a CopyFactory portfolio strategy. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removePortfolioStrategy/
 
         Args:
-            id: Portfolio strategy id.
+            portfolio_id: Portfolio strategy id.
 
         Returns:
             A coroutine resolving when portfolio strategy is removed.
@@ -291,7 +219,7 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('remove_portfolio_strategy')
         opts = {
-            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{id}",
+            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}",
             'method': 'DELETE',
             'headers': {
                 'auth-token': self._token
@@ -299,52 +227,91 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
-    async def get_active_resynchronization_tasks(self, connection_id) -> 'List[ResynchronizationTask]':
-        """Returns list of active resynchronization tasks for a specified connection. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getActiveResynchronizationTasks/
-
-        Args:
-            connection_id: MetaApi account id to return tasks for.
+    async def get_subscribers(self) -> 'List[CopyFactorySubscriber]':
+        """Returns CopyFactory subscribers the user has configured. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getSubscribers/
 
         Returns:
-            A coroutine resolving with list of active resynchronization tasks.
+            A coroutine resolving with subscribers found.
         """
         if self._is_not_jwt_token():
-            return self._handle_no_access_exception('get_active_resynchronization_tasks')
+            return self._handle_no_access_exception('get_subscribers')
         opts = {
-            'url': f"{self._host}/users/current/configuration/connections/{connection_id}" +
-                   "/active-resynchronization-tasks",
+            'url': f"{self._host}/users/current/configuration/subscribers",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             }
         }
+        result = await self._httpClient.request(opts)
+        convert_iso_time_to_date(result)
+        return result
 
-        tasks = await self._httpClient.request(opts)
-        for task in tasks:
-            task['createdAt'] = date(task['createdAt'])
-        return tasks
-
-    async def wait_resynchronization_tasks_completed(self, connection_id: str, timeout_in_seconds: float = 300,
-                                                     interval_in_milliseconds: float = 1000):
-        """Waits until active resynchronization tasks are completed.
+    async def get_subscriber(self, subscriber_id: str) -> CopyFactorySubscriber:
+        """Returns CopyFactory subscriber by id. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getSubscriber/
 
         Args:
-            connection_id: MetaApi account id to wait tasks completed for.
-            timeout_in_seconds: Wait timeout in seconds, default is 5m.
-            interval_in_milliseconds: Interval between tasks reload while waiting for a change, default is 1s.
+            subscriber_id: Subscriber id.
 
         Returns:
-            A couroutine which resolves when tasks are completed.
-
-        Raises:
-            TimeoutException: If tasks have not completed within timeout allowed.
+            A coroutine resolving with subscriber configuration found.
         """
-        start_time = datetime.now().timestamp()
-        tasks = await self.get_active_resynchronization_tasks(connection_id)
-        while len(tasks) and (start_time + timeout_in_seconds) > datetime.now().timestamp():
-            await asyncio.sleep(interval_in_milliseconds / 1000)
-            tasks = await self.get_active_resynchronization_tasks(connection_id)
-        if len(tasks):
-            raise TimeoutException('Timed out waiting for resynchronization tasks for account '
-                                   + connection_id + ' to be completed')
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('get_subscriber')
+        opts = {
+            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}",
+            'method': 'GET',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        subscriber = await self._httpClient.request(opts)
+        convert_iso_time_to_date(subscriber)
+        return subscriber
+
+    async def update_subscriber(self, subscriber_id: str, subscriber: CopyFactorySubscriberUpdate):
+        """Updates CopyFactory subscriber configuration. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/updateSubscriber/
+
+        Args:
+            subscriber_id: Subscriber id.
+            subscriber: Subscriber update.
+
+        Returns:
+            A coroutine resolving when subscriber configuration is updated.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('update_subscriber')
+        payload = deepcopy(subscriber)
+        format_request(payload)
+        opts = {
+            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}",
+            'method': 'PUT',
+            'headers': {
+                'auth-token': self._token
+            },
+            'body': payload
+        }
+        return await self._httpClient.request(opts)
+
+    async def remove_subscriber(self, subscriber_id: str):
+        """Deletes subscriber configuration. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeSubscriber/
+
+        Args:
+            subscriber_id: Subscriber id.
+
+        Returns:
+            A coroutine resolving when subscriber configuration is removed.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('remove_subscriber')
+        opts = {
+            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}",
+            'method': 'DELETE',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        return await self._httpClient.request(opts)

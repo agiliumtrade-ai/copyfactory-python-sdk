@@ -3,7 +3,6 @@ from typing import List, Optional
 from datetime import datetime
 from enum import Enum
 
-
 CopyFactoryStrategySymbolMapping = TypedDict(
     "CopyFactoryStrategySymbolMapping",
     {
@@ -26,6 +25,8 @@ class CopyFactoryStrategyStopout(TypedDict):
     """CopyFactory strategy stopout."""
     strategy: CopyFactoryStrategyIdAndName
     """Strategy which was stopped out."""
+    partial: bool
+    """Flag indicating that stopout is partial."""
     reason: str
     """Stopout reason. One of yearly-balance, monthly-balance, daily-balance, yearly-equity, monthly-equity,
     daily-equity, max-drawdown"""
@@ -173,7 +174,7 @@ class CopyFactoryStrategySubscription(TypedDict):
     maxTradeRisk: Optional[float]
     """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted to
     match the risk limit. If not, the trade SL will be applied according to the risk limit."""
-    reverse: bool
+    reverse: Optional[bool]
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
@@ -210,12 +211,10 @@ class CopyFactoryStrategySubscription(TypedDict):
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
 
 
-class CopyFactoryAccountUpdate(TypedDict):
-    """CopyFactory account update."""
+class CopyFactorySubscriberUpdate(TypedDict):
+    """CopyFactory subscriber update."""
     name: str
     """Account human-readable name."""
-    connectionId: str
-    """Id of the MetaApi MetaTrader account this copy trading account is connected to."""
     reservedMarginFraction: Optional[float]
     """Optional fraction of reserved margin to reduce a risk of margin call. Default is to reserve no margin. We
     recommend using maxLeverage setting instead. Specified as a fraction of balance thus the value is usually greater
@@ -252,10 +251,10 @@ class CopyFactoryAccountUpdate(TypedDict):
     """Strategy subscriptions."""
 
 
-class CopyFactoryAccount(CopyFactoryAccountUpdate):
-    """CopyFactory account model."""
+class CopyFactorySubscriber(CopyFactorySubscriberUpdate):
+    """CopyFactory subscriber model."""
     _id: str
-    """Account unique identifier."""
+    """Id of the MetaApi account to copy trades to."""
 
 
 class CopyFactoryStrategyCommissionScheme(TypedDict):
@@ -296,7 +295,7 @@ class CopyFactoryStrategyUpdate(TypedDict):
     positionLifecycle: str
     """Position detection mode. Allowed values are netting (single position per strategy per symbol),
     hedging (multiple positions per strategy per symbol)"""
-    connectionId: str
+    accountId: str
     """Id of the MetaApi account providing the strategy."""
     skipPendingOrders: Optional[bool]
     """Optional flag indicating that pending orders should not be copied. Default is to copy pending orders"""
@@ -305,7 +304,7 @@ class CopyFactoryStrategyUpdate(TypedDict):
     maxTradeRisk: Optional[float]
     """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted to
     match the risk limit. If not, the trade SL will be applied according to the risk limit."""
-    reverse: bool
+    reverse: Optional[bool]
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
@@ -326,19 +325,12 @@ class CopyFactoryStrategyUpdate(TypedDict):
     maxLeverage: Optional[float]
     """Optional max leverage risk restriction. All trades resulting in a leverage value higher than specified will
     be skipped."""
-    magicFilter: Optional[CopyFactoryStrategyMagicFilter]
-    """Optional magic (expert id) filter."""
-    timeSettings: Optional[CopyFactoryStrategyTimeSettings]
-    """Settings to manage copying timeframe and position lifetime. Default is to copy position within 1 minute from
-    being opened at source and let the position to live for up to 90 days."""
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
     suffixes). By default this setting is disabled and the trades are copied using signal source symbol name."""
     tradeSizeScaling: Optional[CopyFactoryStrategyTradeSizeScaling]
     """Trade size scaling settings. By default the trade size on strategy subscriber side will be scaled according
     to balance to preserve risk."""
-    equityCurveFilter: Optional[CopyFactoryStrategyEquityCurveFilter]
-    """Filter which permits the trades only if account equity is greater than balance moving average."""
     copyStopLoss: Optional[bool]
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
     copyTakeProfit: Optional[bool]
@@ -347,8 +339,15 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    magicFilter: Optional[CopyFactoryStrategyMagicFilter]
+    """Optional magic (expert id) filter."""
+    equityCurveFilter: Optional[CopyFactoryStrategyEquityCurveFilter]
+    """Filter which permits the trades only if account equity is greater than balance moving average."""
     drawdownFilter: Optional[CopyFactoryStrategyDrawdownFilter]
     """Master account strategy drawdown filter."""
+    timeSettings: Optional[CopyFactoryStrategyTimeSettings]
+    """Settings to manage copying timeframe and position lifetime. Default is to copy position within 1 minute from
+    being opened at source and let the position to live for up to 90 days."""
 
 
 class CopyFactoryStrategy(CopyFactoryStrategyUpdate):
@@ -384,10 +383,6 @@ class CopyFactoryTransactionMetrics(TypedDict):
     """Trade algorithm latency introduced by CopyFactory servers, measured in milliseconds."""
     mtAndBrokerTradeLatency: Optional[float]
     """Trade latency for a copied trade introduced by broker and MT platform, measured in milliseconds"""
-    totalLatency: Optional[float]
-    """Total trade copying latency, measured in milliseconds. This value might be slightly different from
-    tradeCopyingLatency value due to limited measurement precision as it is measured based on timestamps captured
-    during copy trading process as opposed to broker data"""
 
 
 class CopyFactoryTransaction(TypedDict):
@@ -426,6 +421,8 @@ class CopyFactoryTransaction(TypedDict):
     """Commission paid by provider to underlying providers."""
     incomingPlatformCommission: Optional[float]
     """Platform commission paid by provider to underlying providers."""
+    quantity: Optional[float]
+    """Trade volume."""
     lotPrice: Optional[float]
     """Trade lot price."""
     tickPrice: Optional[float]
@@ -439,22 +436,10 @@ class CopyFactoryTransaction(TypedDict):
     profit: float
     """Trade profit."""
     metrics: Optional[CopyFactoryTransactionMetrics]
-    """trade copying metrics such as slippage and latencies. Measured selectively for copied trades"""
+    """Trade copying metrics such as slippage and latencies. Measured selectively for copied trades"""
 
 
-class ResynchronizationTask(TypedDict):
-    """Resynchronization task."""
-    _id: str
-    """Task unique id."""
-    type: str
-    """Task type. One of CREATE_ACCOUNT, CREATE_STRATEGY, UPDATE_STRATEGY, REMOVE_STRATEGY."""
-    createdAt: datetime
-    """The time task was created at."""
-    status: str
-    """Task status. One of PLANNED, EXECUTING, SYNCHRONIZING."""
-
-
-class CopyFactoryPortfolioMember(TypedDict):
+class CopyFactoryPortfolioStrategyMember(TypedDict):
     """Portfolio strategy member."""
     strategyId: str
     """Member strategy id."""
@@ -465,7 +450,7 @@ class CopyFactoryPortfolioMember(TypedDict):
     maxTradeRisk: Optional[float]
     """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted
     to match the risk limit. If not, the trade SL will be applied according to the risk limit."""
-    reverse: bool
+    reverse: Optional[bool]
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are
@@ -508,8 +493,8 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     """Strategy human-readable name."""
     description: str
     """Longer strategy human-readable description."""
-    members: List[CopyFactoryPortfolioMember]
-    """Array of portfolio memebers."""
+    members: List[CopyFactoryPortfolioStrategyMember]
+    """Array of portfolio members."""
     commissionScheme: Optional[CopyFactoryStrategyCommissionScheme]
     """Commission scheme allowed by this strategy. By default monthly billing period with no commission is being
     used."""
@@ -518,7 +503,7 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     maxTradeRisk: Optional[float]
     """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted
     to match the risk limit. If not, the trade SL will be applied according to the risk limit."""
-    reverse: bool
+    reverse: Optional[bool]
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
     """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
@@ -571,14 +556,10 @@ class LogLevel(Enum):
     ERROR = 'ERROR'
 
 
-class CopyFactoryUserLogRecord(TypedDict):
+class CopyFactoryUserLogMessage(TypedDict):
     """Trade copying user log record."""
     time: datetime
     """Log record time."""
-    level: LogLevel
-    """Log level. One of INFO, WARN, ERROR."""
-    message: str
-    """Log message."""
     symbol: Optional[str]
     """Symbol traded."""
     strategyId: Optional[str]
@@ -593,3 +574,66 @@ class CopyFactoryUserLogRecord(TypedDict):
     """Type of the trade event relates to. One of market, limit, stop."""
     openPrice: Optional[float]
     """Open price for limit and stop orders."""
+    level: LogLevel
+    """Log level. One of INFO, WARN, ERROR."""
+    message: str
+    """Log message."""
+
+
+class CopyFactoryExternalSignalUpdate(TypedDict):
+    """CopyFactory external signal update payload."""
+    symbol: str
+    """Trade symbol."""
+    type: str
+    """Trade type (one of POSITION_TYPE_BUY, POSITION_TYPE_SELL, ORDER_TYPE_BUY_LIMIT, ORDER_TYPE_SELL_LIMIT,
+    ORDER_TYPE_BUY_STOP, ORDER_TYPE_SELL_STOP)."""
+    time: datetime
+    """Time the signal was emitted at."""
+    updateTime: Optional[datetime]
+    """Last time of the signal update."""
+    volume: float
+    """Volume traded."""
+    magic: Optional[float]
+    """Expert advisor id"""
+    stopLoss: Optional[float]
+    """Stop loss price."""
+    takeProfit: Optional[float]
+    """Take profit price."""
+    openPrice: Optional[float]
+    """Pending order open price."""
+
+
+class CopyFactoryExternalSignalRemove(TypedDict):
+    """CopyFactory external signal remove payload."""
+    time: datetime
+    """The time signal was removed (closed) at."""
+
+
+class CopyFactoryTradingSignal(TypedDict):
+    """CopyFactory trading signal."""
+    strategy: CopyFactoryStrategyIdAndName
+    """Strategy the signal arrived from."""
+    positionId: str
+    """Id of the position the signal was generated from."""
+    time: datetime
+    """Signal time."""
+    symbol: str
+    """Symbol traded."""
+    type: str
+    """Type of the trade (one of market, limit, stop)."""
+    side: str
+    """Side of the trade (one of buy, sell, close)."""
+    openPrice: Optional[float]
+    """Open price for limit and stop orders."""
+    stopLoss: Optional[float]
+    """Stop loss price."""
+    takeProfit: Optional[float]
+    """Take profit price."""
+    signalVolume: float
+    """The signal volume."""
+    subscriberVolume: float
+    """The volume already open on subscriber side."""
+    closeAfter: datetime
+    """The time the signal will be automatically closed at."""
+    closeOnly: Optional[bool]
+    """Flag indicating that only closing side of this signal will be copied."""

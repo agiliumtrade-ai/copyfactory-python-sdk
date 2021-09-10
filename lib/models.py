@@ -5,19 +5,25 @@ import iso8601
 import random
 import string
 import pytz
+import re
 
 
-def date(date_time: str or float or int) -> datetime:
+def date(date_time: str or float or int or datetime) -> datetime:
     """Parses a date string into a datetime object."""
     if isinstance(date_time, float) or isinstance(date_time, int):
         return datetime.fromtimestamp(max(date_time, 100000)).astimezone(pytz.utc)
+    elif isinstance(date_time, datetime):
+        return date_time
     else:
         return iso8601.parse_date(date_time)
 
 
-def format_date(date: datetime) -> str:
+def format_date(date_object: datetime or str) -> str:
     """Converts date to format compatible with JS"""
-    return date.astimezone(pytz.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+    if isinstance(date_object, datetime):
+        return date_object.astimezone(pytz.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+    else:
+        return date_object
 
 
 def random_id(length: int = 32) -> str:
@@ -49,3 +55,38 @@ class ExceptionMessage(TypedDict):
     """Human-readable error message"""
     details: Optional[List[ValidationDetails]]
     """Additional information about error. Used to supply validation error details."""
+
+
+def convert_iso_time_to_date(data):
+    """Converts time fields of incoming data into datetime."""
+    if not isinstance(data, str):
+        for field in data:
+            if isinstance(data,  dict):
+                value = data[field]
+            else:
+                value = field
+            if isinstance(value, str) and field in ['closeAfter', 'stoppedAt', 'stoppedTill', 'startTime', 'time',
+                                                    'updateTime']:
+                data[field] = date(value)
+            if isinstance(value, list):
+                for item in value:
+                    convert_iso_time_to_date(item)
+            if isinstance(value, dict):
+                convert_iso_time_to_date(value)
+
+
+def format_request(data: dict or list):
+    """Formats datetime fields of a request into iso format."""
+    if not isinstance(data, str):
+        for field in data:
+            if isinstance(data, dict):
+                value = data[field]
+            else:
+                value = field
+            if isinstance(value, datetime):
+                data[field] = format_date(value)
+            elif isinstance(value, list):
+                for item in value:
+                    format_request(item)
+            elif isinstance(value, dict):
+                format_request(value)

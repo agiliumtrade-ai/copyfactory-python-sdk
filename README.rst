@@ -102,22 +102,20 @@ In order to configure trade copying you need to:
     copy_factory = CopyFactory(token=token)
 
     # retrieve MetaApi MetaTrader accounts with CopyFactory as application field value
+    # master account must have PROVIDER value in copyFactoryRoles
     master_metaapi_account = await metaapi.metatrader_account_api.get_account(account_id='masterMetaapiAccountId')
-    if master_metaapi_account.application != 'CopyFactory'
-        raise Exception('Please specify CopyFactory application field value in your MetaApi account in order to use it in CopyFactory API')
+    if (master_metaapi_account is None) or master_metaapi_account.copy_factory_roles is None or 'PROVIDER' not \
+            in master_metaapi_account.copy_factory_roles:
+        raise Exception('Please specify PROVIDER copyFactoryRoles value in your MetaApi '
+                        'account in order to use it in CopyFactory API')
+    # slave account must have SUBSCRIBER value in copyFactoryRoles
     slave_metaapi_account = await metaapi.metatrader_account_api.get_account(account_id='slaveMetaapiAccountId')
-    if slave_metaapi_account.application != 'CopyFactory'
-        raise Exception('Please specify CopyFactory application field value in your MetaApi account in order to use it in CopyFactory API')
+    if (slave_metaapi_account is None) or slave_metaapi_account.copy_factory_roles is None or 'SUBSCRIBER' not \
+            in slave_metaapi_account.copy_factory_roles:
+        raise Exception('Please specify SUBSCRIBER copyFactoryRoles value in your MetaApi '
+                        'account in order to use it in CopyFactory API')
 
-    # create CopyFactory master and slave accounts and connect them to MetaApi accounts via connectionId field
     configuration_api = copy_factory.configuration_api
-    master_account_id = configuration_api.generate_account_id()
-    slave_account_id = configuration_api.generate_account_id()
-    await configuration_api.update_account(id=master_account_id, account={
-        'name': 'Demo account',
-        'connectionId': master_metaapi_account.id,
-        'subscriptions': []
-    })
 
     # create a strategy being copied
     strategy_id = await configuration_api.generate_strategy_id()
@@ -125,7 +123,7 @@ In order to configure trade copying you need to:
         'name': 'Test strategy',
         'description': 'Some useful description about your strategy',
         'positionLifecycle': 'hedging',
-        'connectionId': master_metaapi_account.id,
+        'accountId': master_metaapi_account.id,
         'maxTradeRisk': 0.1,
         'stopOutRisk': {
             'value': 0.4,
@@ -138,9 +136,8 @@ In order to configure trade copying you need to:
     })
 
     # subscribe slave CopyFactory accounts to the strategy
-    await configuration_api.update_account(id=slave_account_id, account={
+    await configuration_api.update_subscriber(slave_metaapi_account.id, {
         'name': 'Demo account',
-        'connectionId': slave_metaapi_account.id,
         'subscriptions': [
             {
                 'strategyId': strategy_id['id'],
@@ -148,6 +145,15 @@ In order to configure trade copying you need to:
             }
         ]
     })
+
+    # retrieve list of strategies
+    print(await configuration_api.get_strategies())
+
+    # retrieve list of provider portfolios
+    print(await configuration_api.get_portfolio_strategies())
+
+    # retrieve list of subscribers
+    print(await configuration_api.get_subscribers())
 
 See in-code documentation for full definition of possible configuration options.
 
@@ -163,12 +169,6 @@ Retrieving trading history on provider side
 
     history_api = copy_factory.history_api
 
-    # retrieve list of subscribers
-    print(await history_api.get_subscribers())
-
-    # retrieve list of strategies provided
-    print(await history_api.get_provided_strategies())
-
     # retrieve trading history, please note that this method support pagination and limits number of records
     print(await history_api.get_provided_strategies_transactions(time_from=datetime.fromisoformat('2020-08-01'),
         time_till=datetime.fromisoformat('2020-09-01')))
@@ -180,12 +180,6 @@ Retrieving trading history on subscriber side
 .. code-block:: python
 
     history_api = copy_factory.history_api
-
-    # retrieve list of providers
-    print(await history_api.get_providers())
-
-    # retrieve list of strategies subscribed to
-    print(await history_api.get_strategies_subscribed())
 
     # retrieve trading history, please note that this method support pagination and limits number of records
     print(await history_api.get_strategies_subscribed_transactions(time_from=datetime.fromisoformat('2020-08-01'),
@@ -207,6 +201,38 @@ closed manually on a slave account will also be reopened during resynchronizatio
     # resynchronize specific strategy
     await copy_factory.trading_api.resynchronize(account_id=account_id, strategy_ids=['ABCD'])
 
+Sending external trading signals to a strategy
+==============================================
+You can submit external trading signals to your trading strategy.
+
+.. code-block:: python
+
+    trading_api = copy_factory.trading_api
+    signal_id = trading_api.generate_signal_id()
+
+    # add trading signal
+    await trading_api.update_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
+        'symbol': 'EURUSD',
+        'type': 'POSITION_TYPE_BUY',
+        'time': datetime.now(),
+        'volume': 1.5
+    })
+
+    # remove signal
+    await trading_api.remove_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
+        'time': datetime.now()
+    })
+
+Retrieving trading signals
+==========================
+
+.. code-block:: python
+
+    subscriber_id = '...' # CopyFactory subscriber id
+
+    # retrieve trading signals
+    print(await copy_factory.trading_api.get_trading_signals(subscriber_id))
+
 Managing stopouts
 =================
 A subscription to a strategy can be stopped if the strategy have exceeded allowed risk limit.
@@ -221,7 +247,7 @@ A subscription to a strategy can be stopped if the strategy have exceeded allowe
     print(await trading_api.get_stopouts(account_id=account_id))
 
     # reset a stopout so that subscription can continue
-    await trading_api.reset_stopout(account_id=account_id, strategy_id=strategy_id, reason='daily-equity')
+    await trading_api.reset_stopouts(account_id=account_id, strategy_id=strategy_id, reason='daily-equity')
 
 Retrieving slave trading logs
 =============================
