@@ -215,7 +215,7 @@ You can submit external trading signals to your trading strategy.
         'symbol': 'EURUSD',
         'type': 'POSITION_TYPE_BUY',
         'time': datetime.now(),
-        'volume': 1.5
+        'volume': 0.01
     })
 
     # remove signal
