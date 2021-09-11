@@ -32,7 +32,7 @@ async def external_signal():
 
         configuration_api = copy_factory.configuration_api
         strategies = await configuration_api.get_strategies()
-        strategy = next((a for a in strategies if a['accountId'] == master_metaapi_account.id), None)
+        strategy = next((s for s in strategies if s['accountId'] == master_metaapi_account.id), None)
         if strategy:
             strategy_id = strategy['_id']
         else:
@@ -64,7 +64,7 @@ async def external_signal():
             'symbol': 'EURUSD',
             'type': 'POSITION_TYPE_BUY',
             'time': datetime.now(),
-            'volume': 1.5
+            'volume': 0.01
         })
 
         await asyncio.sleep(10)

@@ -230,7 +230,7 @@ class CopyFactorySubscriberUpdate(TypedDict):
     allowed to open new positions with a symbol equal to the symbol of an existing strategy position (can be used to
     gracefully exit strategies trading in netting mode or placing a series of related trades per symbol). One of
     by-position, by-symbol or leave empty to disable this setting."""
-    stopOutRisk: Optional[CopyFactoryStrategyStopout]
+    stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
     """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
     this value."""
     riskLimits: Optional[List[CopyFactoryStrategyRiskLimit]]

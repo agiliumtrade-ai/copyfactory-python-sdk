@@ -32,7 +32,7 @@ async def configure_copyfactory():
 
         configuration_api = copy_factory.configuration_api
         strategies = await configuration_api.get_strategies()
-        strategy = next((a for a in strategies if a['accountId'] == master_metaapi_account.id), None)
+        strategy = next((s for s in strategies if s['accountId'] == master_metaapi_account.id), None)
         if strategy:
             strategy_id = strategy['_id']
         else:
