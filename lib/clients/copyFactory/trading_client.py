@@ -34,11 +34,11 @@ class TradingClient(MetaApiClient):
 
     async def update_external_signal(self, strategy_id: str, signal_id: str, signal: CopyFactoryExternalSignalUpdate):
         """Updates external signal for a strategy. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/updateSignal/
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/updateExternalSignal/
 
         Args:
             strategy_id: Strategy id.
-            signal_id: External signal id
+            signal_id: External signal id (should be 8 alphanumerical symbols)
             signal: Signal update payload.
 
         Returns:
@@ -60,7 +60,7 @@ class TradingClient(MetaApiClient):
 
     async def remove_external_signal(self, strategy_id: str, signal_id: str, signal: CopyFactoryExternalSignalRemove):
         """Removes (closes) external signal for a strategy. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/removeSignal/
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/removeExternalSignal/
 
         Args:
             strategy_id: Strategy id.
@@ -116,7 +116,7 @@ class TradingClient(MetaApiClient):
 
     async def get_trading_signals(self, subscriber_id: str) -> 'List[CopyFactoryTradingSignal]':
         """Returns trading signals the subscriber is subscribed to. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getSignals/
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getTradingSignals/
 
         Args:
             subscriber_id: Subscriber id.

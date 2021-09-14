@@ -20,18 +20,18 @@ class HistoryClient(MetaApiClient):
         super().__init__(http_client, token, domain)
         self._host = f'https://copyfactory-application-history-master-v1.{domain}'
 
-    async def get_provided_strategies_transactions(self, time_from: datetime, time_till: datetime,
-                                                   strategy_ids: List[str] = None, account_ids: List[str] = None,
-                                                   offset: int = None, limit: int = None) -> \
+    async def get_provided_transactions(self, time_from: datetime, time_till: datetime,
+                                        strategy_ids: List[str] = None, subscriber_ids: List[str] = None,
+                                        offset: int = None, limit: int = None) -> \
             'List[CopyFactoryTransaction]':
         """Returns list of transactions on the strategies the current user provides to other users. See
-        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getProvidedStrategiesTransactions/
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getProvidedTransactions/
 
         Args:
             time_from: Time to load transactions from.
             time_till: Time to load transactions till.
             strategy_ids: Optional list of strategy ids to filter transactions by.
-            account_ids: The list of CopyFactory subscriber account id (64-character long) to filter by.
+            subscriber_ids: The list of CopyFactory subscriber account ids to filter by.
             offset: Pagination offset. Default value is 0.
             limit: Pagination limit. Default value is 1000.
 
@@ -39,15 +39,15 @@ class HistoryClient(MetaApiClient):
             A coroutine resolving with transactions found.
         """
         if self._is_not_jwt_token():
-            return self._handle_no_access_exception('get_provided_strategies_transactions')
+            return self._handle_no_access_exception('get_provided_transactions')
         qs = {
             'from': format_date(time_from),
             'till': format_date(time_till)
         }
         if strategy_ids:
             qs['strategyId'] = strategy_ids
-        if account_ids:
-            qs['accountId'] = account_ids
+        if subscriber_ids:
+            qs['subscriberId'] = subscriber_ids
         if not (offset is None):
             qs['offset'] = offset
         if limit:
@@ -64,18 +64,18 @@ class HistoryClient(MetaApiClient):
         convert_iso_time_to_date(transactions)
         return transactions
 
-    async def get_strategies_subscribed_transactions(self, time_from: datetime, time_till: datetime,
-                                                     strategy_ids: List[str] = None, account_ids: List[str] = None,
-                                                     offset: int = None, limit: int = None) -> \
+    async def get_subscription_transactions(self, time_from: datetime, time_till: datetime,
+                                            strategy_ids: List[str] = None, subscriber_ids: List[str] = None,
+                                            offset: int = None, limit: int = None) -> \
             'List[CopyFactoryTransaction]':
         """Returns list of trades on the strategies the current user subscribed to
-        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getStrategiesSubscribedTransactions/
+        https://metaapi.cloud/docs/copyfactory/restApi/api/history/getSubscriptionTransactions/
 
         Args:
             time_from: Time to load transactions from.
             time_till: Time to load transactions till.
             strategy_ids: Optional list of strategy ids to filter transactions by.
-            account_ids: The list of CopyFactory subscriber account id (64-character long) to filter by.
+            subscriber_ids: The list of CopyFactory subscriber account ids to filter by.
             offset: Pagination offset. Default value is 0.
             limit: Pagination limit. Default value is 1000.
 
@@ -83,15 +83,15 @@ class HistoryClient(MetaApiClient):
             A coroutine resolving with transactions found.
         """
         if self._is_not_jwt_token():
-            return self._handle_no_access_exception('get_strategies_subscribed_transactions')
+            return self._handle_no_access_exception('get_subscription_transactions')
         qs = {
             'from': format_date(time_from),
             'till': format_date(time_till)
         }
         if strategy_ids:
             qs['strategyId'] = strategy_ids
-        if account_ids:
-            qs['accountId'] = account_ids
+        if subscriber_ids:
+            qs['subscriberId'] = subscriber_ids
         if not (offset is None):
             qs['offset'] = offset
         if limit:

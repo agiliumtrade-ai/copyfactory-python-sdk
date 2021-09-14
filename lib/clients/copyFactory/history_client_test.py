@@ -27,14 +27,14 @@ class TestHistoryClient:
             'id': '64664661:close',
             'type': 'DEAL_TYPE_SELL',
             'time': '2020-08-02T21:01:01.830Z',
-            'accountId': '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            'subscriberId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
             'symbol': 'EURJPY',
             'subscriber': {
                 'id': 'subscriberId',
                 'name': 'Subscriber'
             },
             'demo': False,
-            'provider': {
+            'providerUser': {
                 'id': 'providerId',
                 'name': 'Provider'
             },
@@ -56,12 +56,12 @@ class TestHistoryClient:
         time_till = datetime.now()
         rsps = respx.get(url__startswith=f'{copy_factory_api_url}/users/current/provided-transactions') \
             .mock(return_value=Response(200, json=expected))
-        accounts = await history_client.get_provided_strategies_transactions(time_from, time_till, ['ABCD'],
-                                                                             ['accountId'], 100, 200)
+        accounts = await history_client.get_provided_transactions(
+            time_from, time_till, ['ABCD'], ['e8867baa-5ec2-45ae-9930-4d5cea18d0d6'], 100, 200)
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/provided-transactions' \
                                             f'?from={format_date(time_from).replace(":", "%3A")}&' \
                                             f'till={format_date(time_till).replace(":", "%3A")}&strategyId=ABCD&' \
-                                            f'accountId=accountId&offset=100&limit=200'
+                                            f'subscriberId=e8867baa-5ec2-45ae-9930-4d5cea18d0d6&offset=100&limit=200'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['time'] = date(expected[0]['time'])
@@ -72,9 +72,9 @@ class TestHistoryClient:
         """Should not retrieve transactions on provided strategies from API with account token."""
         history_client = HistoryClient(http_client, 'token')
         try:
-            await history_client.get_provided_strategies_transactions(datetime.now(), datetime.now())
+            await history_client.get_provided_transactions(datetime.now(), datetime.now())
         except Exception as err:
-            assert err.__str__() == 'You can not invoke get_provided_strategies_transactions method, because ' + \
+            assert err.__str__() == 'You can not invoke get_provided_transactions method, because ' + \
                    'you have connected with account access token. Please use API access token from ' + \
                    'https://app.metaapi.cloud/token page to invoke this method.'
 
@@ -86,14 +86,14 @@ class TestHistoryClient:
             'id': '64664661:close',
             'type': 'DEAL_TYPE_SELL',
             'time': '2020-08-02T21:01:01.830Z',
-            'accountId': '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            'subscriberId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
             'symbol': 'EURJPY',
-            'subscriber': {
+            'subscriberUser': {
                 'id': 'subscriberId',
                 'name': 'Subscriber'
             },
             'demo': False,
-            'provider': {
+            'providerUser': {
                 'id': 'providerId',
                 'name': 'Provider'
             },
@@ -115,12 +115,12 @@ class TestHistoryClient:
         time_till = datetime.now()
         rsps = respx.get(f'{copy_factory_api_url}/users/current/subscription-transactions') \
             .mock(return_value=Response(200, json=expected))
-        accounts = await history_client.get_strategies_subscribed_transactions(time_from, time_till, ['ABCD'],
-                                                                               ['subscriberId'], 100, 200)
+        accounts = await history_client.get_subscription_transactions(
+            time_from, time_till, ['ABCD'], ['e8867baa-5ec2-45ae-9930-4d5cea18d0d6'], 100, 200)
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/subscription-transactions' \
                                             f'?from={format_date(time_from).replace(":", "%3A")}&' \
                                             f'till={format_date(time_till).replace(":", "%3A")}&strategyId=ABCD&' \
-                                            f'accountId=subscriberId&offset=100&limit=200'
+                                            f'subscriberId=e8867baa-5ec2-45ae-9930-4d5cea18d0d6&offset=100&limit=200'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['time'] = date(expected[0]['time'])
@@ -131,8 +131,8 @@ class TestHistoryClient:
         """Should not retrieve transactions on strategies subscribed to from API with account token."""
         history_client = HistoryClient(http_client, 'token')
         try:
-            await history_client.get_strategies_subscribed_transactions(datetime.now(), datetime.now())
+            await history_client.get_subscription_transactions(datetime.now(), datetime.now())
         except Exception as err:
-            assert err.__str__() == 'You can not invoke get_strategies_subscribed_transactions method, ' + \
+            assert err.__str__() == 'You can not invoke get_subscription_transactions method, ' + \
                    'because you have connected with account access token. Please use API access token from ' + \
                    'https://app.metaapi.cloud/token page to invoke this method.'

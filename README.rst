@@ -170,7 +170,7 @@ Retrieving trading history on provider side
     history_api = copy_factory.history_api
 
     # retrieve trading history, please note that this method support pagination and limits number of records
-    print(await history_api.get_provided_strategies_transactions(time_from=datetime.fromisoformat('2020-08-01'),
+    print(await history_api.get_provided_transactions(time_from=datetime.fromisoformat('2020-08-01'),
         time_till=datetime.fromisoformat('2020-09-01')))
 
 
@@ -182,7 +182,7 @@ Retrieving trading history on subscriber side
     history_api = copy_factory.history_api
 
     # retrieve trading history, please note that this method support pagination and limits number of records
-    print(await history_api.get_strategies_subscribed_transactions(time_from=datetime.fromisoformat('2020-08-01'),
+    print(await history_api.get_subscription_transactions(time_from=datetime.fromisoformat('2020-08-01'),
         time_till=datetime.fromisoformat('2020-09-01')))
 
 Resynchronizing slave accounts to masters
