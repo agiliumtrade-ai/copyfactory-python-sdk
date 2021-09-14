@@ -42,7 +42,7 @@ class CopyFactoryStrategyEquityCurveFilter(TypedDict):
     """CopyFactory strategy equity curve filter."""
     period: float
     """Moving average period, must be greater or equal to 1."""
-    granularity: str
+    timeframe: str
     """Moving average granularity, a positive integer followed by time unit, e.g. 2h.
     Allowed units are s, m, h, d and w."""
 
@@ -359,8 +359,8 @@ class CopyFactoryStrategy(CopyFactoryStrategyUpdate):
     commission applies only to accounts not managed directly by provider. Should be fraction of 1."""
 
 
-class CopyFactorySubscriberOrProvider(TypedDict):
-    """CopyFactory provider or subscriber"""
+class CopyFactorySubscriberOrProviderUser(TypedDict):
+    """CopyFactory provider or subscriber user"""
     id: str
     """Profile id."""
     name: str
@@ -397,20 +397,22 @@ class CopyFactoryTransaction(TypedDict):
     DEAL_TAX). See https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties#enum_deal_type."""
     time: datetime
     """Transaction time."""
-    accountId: str
-    """CopyFactory account id."""
+    subscriberId: str
+    """CopyFactory subscriber id."""
     symbol: Optional[str]
     """Optional symbol traded."""
-    subscriber: CopyFactorySubscriberOrProvider
+    subscriberUser: CopyFactorySubscriberOrProviderUser
     """Strategy subscriber."""
     demo: bool
     """Demo account flag."""
-    provider: CopyFactorySubscriberOrProvider
+    providerUser: CopyFactorySubscriberOrProviderUser
     """Strategy provider."""
     strategy: CopyFactoryStrategyIdAndName
     """Strategy."""
     positionId: Optional[str]
     """Source position id."""
+    slavePositionId: Optional[str]
+    """Slave position id."""
     improvement: float
     """High-water mark strategy balance improvement."""
     providerCommission: float

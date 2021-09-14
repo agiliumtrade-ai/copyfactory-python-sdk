@@ -1,3 +1,6 @@
+3.0.1
+  - fixed transaction REST API
+
 3.0.0
   - breaking change: migrated to CopyFactory 2
 

@@ -82,10 +82,9 @@ class TestTradingClient:
     async def test_resynchronize_copyfactory_subscriber(self):
         """Should resynchronize CopyFactory subscriber."""
         rsps = respx.post(f'{copy_factory_api_url}/users/current/subscribers/' +
-                          '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/' +
+                          'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/' +
                           'resynchronize?strategyId=ABCD&positionId=0123456').mock(return_value=Response(200))
-        await trading_client.resynchronize('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
-                                           ['ABCD'], ['0123456'])
+        await trading_client.resynchronize('e8867baa-5ec2-45ae-9930-4d5cea18d0d6', ['ABCD'], ['0123456'])
         assert rsps.calls[0].request.method == 'POST'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
 
@@ -94,7 +93,7 @@ class TestTradingClient:
         """Should not resynchronize CopyFactory subscriber with account token."""
         trading_client = TradingClient(http_client, 'token')
         try:
-            await trading_client.resynchronize('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            await trading_client.resynchronize('e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
                                                ['ABCD'], ['0123456'])
         except Exception as err:
             assert err.__str__() == 'You can not invoke resynchronize method, ' + \
@@ -113,12 +112,12 @@ class TestTradingClient:
             'volume': 1
         }]
         rsps = respx.get(url__startswith=f'{copy_factory_api_url}/users/current/subscribers/' +
-                         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/signals') \
+                         'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/signals') \
             .mock(return_value=Response(200, json=expected))
         signals = await trading_client.\
-            get_trading_signals('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+            get_trading_signals('e8867baa-5ec2-45ae-9930-4d5cea18d0d6')
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/subscribers/' + \
-            '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/signals'
+            'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/signals'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['time'] = date(expected[0]['time'])
@@ -152,12 +151,11 @@ class TestTradingClient:
             'reasonDescription': 'total strategy equity drawdown exceeded limit'
         }]
         rsps = respx.get(f'{copy_factory_api_url}/users/current/subscribers/' +
-                         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/' +
+                         'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/' +
                          'stopouts').mock(return_value=Response(200, json=expected))
-        stopouts = await trading_client.get_stopouts('0123456789abcdef0123456789abcdef0123456789abcdef' +
-                                                     '0123456789abcdef')
+        stopouts = await trading_client.get_stopouts('e8867baa-5ec2-45ae-9930-4d5cea18d0d6')
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/subscribers/' + \
-            '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/stopouts'
+            'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/stopouts'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['stoppedAt'] = date(expected[0]['stoppedAt'])
@@ -169,7 +167,7 @@ class TestTradingClient:
         """Should not retrieve stopouts from API with account token."""
         trading_client = TradingClient(http_client, 'token')
         try:
-            await trading_client.get_stopouts('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+            await trading_client.get_stopouts('e8867baa-5ec2-45ae-9930-4d5cea18d0d6')
         except Exception as err:
             assert err.__str__() == 'You can not invoke get_stopouts method, ' + \
                    'because you have connected with account access token. Please use API access token from ' + \
@@ -180,9 +178,9 @@ class TestTradingClient:
     async def test_reset_stopouts(self):
         """Should reset stopouts."""
         rsps = respx.post(f'{copy_factory_api_url}/users/current/subscribers/' +
-                          '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/' +
+                          'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/' +
                           'subscription-strategies/ABCD/stopouts/daily-equity/reset').mock(return_value=Response(200))
-        await trading_client.reset_stopouts('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+        await trading_client.reset_stopouts('e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
                                             'ABCD', 'daily-equity')
         assert rsps.calls[0].request.method == 'POST'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
@@ -192,7 +190,7 @@ class TestTradingClient:
         """Should not reset stopouts with account token."""
         trading_client = TradingClient(http_client, 'token')
         try:
-            await trading_client.reset_stopouts('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            await trading_client.reset_stopouts('e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
                                                 'ABCD', 'daily-equity')
         except Exception as err:
             assert err.__str__() == 'You can not invoke reset_stopouts method, ' + \
@@ -209,14 +207,14 @@ class TestTradingClient:
           'message': 'message'
         }]
         rsps = respx.get(f'{copy_factory_api_url}/users/current/subscribers/' +
-                         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/user-log' +
+                         'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/user-log' +
                          '?offset=10&limit=100&startTime=2020-08-01T00%3A00%3A00.000Z&endTime=2020-0' +
                          '8-10T00%3A00%3A00.000Z').mock(return_value=Response(200, json=expected))
-        records = await trading_client.get_user_log('0123456789abcdef0123456789abcdef0123456789abcdef' +
-                                                    '0123456789abcdef', date('2020-08-01T00:00:00.000Z'),
+        records = await trading_client.get_user_log('e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
+                                                    date('2020-08-01T00:00:00.000Z'),
                                                     date('2020-08-10T00:00:00.000Z'), 10, 100)
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/subscribers/' + \
-               '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/user-log' + \
+               'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/user-log' + \
                '?offset=10&limit=100&startTime=2020-08-01T00%3A00%3A00.000Z&endTime=2020-08-10T00%3A00%3A00.000Z'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
@@ -228,7 +226,7 @@ class TestTradingClient:
         """Should not retrieve copy trading user log from API with account token."""
         trading_client = TradingClient(http_client, 'token')
         try:
-            await trading_client.get_user_log('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+            await trading_client.get_user_log('e8867baa-5ec2-45ae-9930-4d5cea18d0d6')
         except Exception as err:
             assert err.__str__() == 'You can not invoke get_user_log method, ' + \
                    'because you have connected with account access token. Please use API access token from ' + \

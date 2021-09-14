@@ -380,7 +380,7 @@ class TestConfigurationClient:
     async def test_retrieve_copyfactory_subscribers_from_api(self):
         """Should retrieve CopyFactory subscribers from API."""
         expected = [{
-          '_id': '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+          '_id': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
           'name': 'Demo account',
           'reservedMarginFraction': 0.25,
           'subscriptions': [
@@ -414,7 +414,7 @@ class TestConfigurationClient:
     async def test_retrieve_copyfactory_subscriber_from_api(self):
         """Should retrieve CopyFactory subscriber from API."""
         expected = {
-            '_id': '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            '_id': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
             'name': 'Demo account',
             'reservedMarginFraction': 0.25,
             'subscriptions': [
@@ -425,18 +425,16 @@ class TestConfigurationClient:
             ]
         }
         rsps = respx.get(f'{copy_factory_api_url}/users/current/configuration/subscribers/' +
-                         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef') \
-            .mock(return_value=Response(200, json=expected))
-        accounts = await copy_factory_client\
-            .get_subscriber('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+                         'e8867baa-5ec2-45ae-9930-4d5cea18d0d6').mock(return_value=Response(200, json=expected))
+        accounts = await copy_factory_client.get_subscriber('e8867baa-5ec2-45ae-9930-4d5cea18d0d6')
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/subscribers/' + \
-               '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+               'e8867baa-5ec2-45ae-9930-4d5cea18d0d6'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         assert accounts == expected
 
     @pytest.mark.asyncio
-    async def test_not_retrieve_copyfactory_account_with_account_token(self):
+    async def test_not_retrieve_copyfactory_subscriber_with_account_token(self):
         """Should not retrieve CopyFactory subscriber from API with account token."""
         copy_factory_client = ConfigurationClient(http_client, 'token')
         try:
@@ -461,12 +459,10 @@ class TestConfigurationClient:
             ]
         }
         rsps = respx.put(f'{copy_factory_api_url}/users/current/configuration/subscribers/' +
-                         '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
-                         json=subscriber).mock(return_value=Response(200))
-        await copy_factory_client.update_subscriber('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
-                                                    subscriber)
+                         'e8867baa-5ec2-45ae-9930-4d5cea18d0d6', json=subscriber).mock(return_value=Response(200))
+        await copy_factory_client.update_subscriber('e8867baa-5ec2-45ae-9930-4d5cea18d0d6', subscriber)
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/subscribers/' + \
-                                            '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+                                            'e8867baa-5ec2-45ae-9930-4d5cea18d0d6'
         assert rsps.calls[0].request.method == 'PUT'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         assert rsps.calls[0].request.read() == json.dumps(subscriber).encode('utf-8')
@@ -487,12 +483,10 @@ class TestConfigurationClient:
     async def test_remove_copyfactory_subscriber(self):
         """Should remove CopyFactory subscriber via API."""
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/subscribers/' +
-                            '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')\
-            .mock(return_value=Response(204))
-        await copy_factory_client\
-            .remove_subscriber('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+                            'e8867baa-5ec2-45ae-9930-4d5cea18d0d6').mock(return_value=Response(204))
+        await copy_factory_client.remove_subscriber('e8867baa-5ec2-45ae-9930-4d5cea18d0d6')
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/subscribers/' + \
-               '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+               'e8867baa-5ec2-45ae-9930-4d5cea18d0d6'
         assert rsps.calls[0].request.method == 'DELETE'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
 
