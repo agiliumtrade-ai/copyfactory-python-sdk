@@ -169,8 +169,8 @@ class CopyFactoryStrategySubscription(TypedDict):
     closeOnly: Optional[str]
     """Optional setting which instructs the application not to open new positions. by-symbol means that it is still
     allowed to open new positions with a symbol equal to the symbol of an existing strategy position (can be used to
-    gracefully exit strategies trading in netting mode or placing a series of related trades per symbol). One of
-    by-position, by-symbol or leave empty to disable this setting."""
+    gracefully exit strategies trading in netting mode or placing a series of related trades per symbol). immediately
+    means to close all positions immediately. One of 'by-position', 'by-symbol', 'immediately'."""
     maxTradeRisk: Optional[float]
     """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted to
     match the risk limit. If not, the trade SL will be applied according to the risk limit."""
@@ -226,10 +226,10 @@ class CopyFactorySubscriberUpdate(TypedDict):
     broker charges a fixed fee per transaction so that you can skip small trades with high broker commission rates.
     Default is 100."""
     closeOnly: Optional[str]
-    """Optional setting wich instructs the application not to open new positions. by-symbol means that it is still
+    """Optional setting which instructs the application not to open new positions. by-symbol means that it is still
     allowed to open new positions with a symbol equal to the symbol of an existing strategy position (can be used to
-    gracefully exit strategies trading in netting mode or placing a series of related trades per symbol). One of
-    by-position, by-symbol or leave empty to disable this setting."""
+    gracefully exit strategies trading in netting mode or placing a series of related trades per symbol). immediately
+    means to close all positions immediately. One of 'by-position', 'by-symbol', 'immediately'."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
     """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
     this value."""
@@ -639,3 +639,15 @@ class CopyFactoryTradingSignal(TypedDict):
     """The time the signal will be automatically closed at."""
     closeOnly: Optional[bool]
     """Flag indicating that only closing side of this signal will be copied."""
+
+
+class CopyFactoryCloseInstructions(TypedDict):
+    """CopyFactory close instructions"""
+    mode: str
+    """Position close mode on strategy or subscription removal. Preserve means that positions will not be closed and
+    will not be managed by CopyFactory. close-gracefully-by-position means that positions will continue to be managed
+    by CopyFactory, but only close signals will be copied. close-gracefully-by-symbol means that positions will
+    continue to be managed by CopyFactory, but only close signals will be copied or signals to open positions for the
+    symbols which already have positions opened. close-immediately means that all positions will be closed immediately.
+    Default is close-immediately (one of 'preserve', 'close-gracefully-by-position', 'close-gracefully-by-symbol',
+    'close-immediately')."""

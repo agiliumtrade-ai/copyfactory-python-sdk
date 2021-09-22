@@ -2,7 +2,7 @@ from ..metaApi_client import MetaApiClient
 from ...models import random_id, convert_iso_time_to_date, format_request
 from .copyFactory_models import StrategyId, CopyFactoryStrategyUpdate, CopyFactorySubscriberUpdate, \
     CopyFactorySubscriber, CopyFactoryStrategy, CopyFactoryPortfolioStrategy, \
-    CopyFactoryPortfolioStrategyUpdate
+    CopyFactoryPortfolioStrategyUpdate, CopyFactoryCloseInstructions
 from typing import List
 from copy import deepcopy
 
@@ -117,12 +117,13 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
-    async def remove_strategy(self, strategy_id: str):
+    async def remove_strategy(self, strategy_id: str, close_instructions: CopyFactoryCloseInstructions = None):
         """Deletes a CopyFactory strategy. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeStrategy/
 
         Args:
             strategy_id: Copy trading strategy id.
+            close_instructions: Strategy close instructions.
 
         Returns:
             A coroutine resolving when strategy is removed.
@@ -136,6 +137,8 @@ class ConfigurationClient(MetaApiClient):
                 'auth-token': self._token
             }
         }
+        if close_instructions is not None:
+            opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
     async def get_portfolio_strategies(self) -> 'List[CopyFactoryPortfolioStrategy]':
@@ -206,12 +209,14 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
-    async def remove_portfolio_strategy(self, portfolio_id: str):
+    async def remove_portfolio_strategy(self, portfolio_id: str,
+                                        close_instructions: CopyFactoryCloseInstructions = None):
         """Deletes a CopyFactory portfolio strategy. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removePortfolioStrategy/
 
         Args:
             portfolio_id: Portfolio strategy id.
+            close_instructions: Portfolio close instructions.
 
         Returns:
             A coroutine resolving when portfolio strategy is removed.
@@ -225,6 +230,8 @@ class ConfigurationClient(MetaApiClient):
                 'auth-token': self._token
             }
         }
+        if close_instructions is not None:
+            opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
     async def get_subscribers(self) -> 'List[CopyFactorySubscriber]':

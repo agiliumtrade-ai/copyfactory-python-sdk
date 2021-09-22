@@ -199,12 +199,14 @@ class TestConfigurationClient:
     @pytest.mark.asyncio
     async def test_remove_strategy(self):
         """Should remove strategy via API."""
+        payload = {'mode': 'preserve'}
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/strategies/ABCD') \
             .mock(return_value=Response(204))
-        await copy_factory_client.remove_strategy('ABCD')
+        await copy_factory_client.remove_strategy('ABCD', payload)
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/strategies/ABCD'
         assert rsps.calls[0].request.method == 'DELETE'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
+        assert rsps.calls[0].request.content == json.dumps(payload).encode('utf-8')
 
     @pytest.mark.asyncio
     async def test_not_remove_strategy_with_account_token(self):
@@ -356,13 +358,15 @@ class TestConfigurationClient:
     @pytest.mark.asyncio
     async def test_remove_portfolio_strategy(self):
         """Should remove portfolio strategy via API."""
+        payload = {'mode': 'preserve'}
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/portfolio-strategies/ABCD')\
             .mock(return_value=Response(204))
-        await copy_factory_client.remove_portfolio_strategy('ABCD')
+        await copy_factory_client.remove_portfolio_strategy('ABCD', payload)
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/' \
                                             f'portfolio-strategies/ABCD'
         assert rsps.calls[0].request.method == 'DELETE'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
+        assert rsps.calls[0].request.content == json.dumps(payload).encode('utf-8')
 
     @pytest.mark.asyncio
     async def test_not_remove_portfolio_strategy_with_account_token(self):
