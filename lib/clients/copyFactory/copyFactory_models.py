@@ -32,6 +32,8 @@ class CopyFactoryStrategyStopout(TypedDict):
     daily-equity, max-drawdown"""
     reasonDescription: str
     """Human-readable description of the stopout reason."""
+    closePositions: Optional[bool]
+    """Flag indicating if positions should be closed."""
     stoppedAt: datetime
     """Time the strategy was stopped at."""
     stoppedTill: datetime
