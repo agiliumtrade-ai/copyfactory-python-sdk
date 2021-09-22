@@ -1,5 +1,6 @@
 3.0.2
   - updated remove REST API
+  - updated StrategyStopout model
 
 3.0.1
   - fixed transaction REST API
