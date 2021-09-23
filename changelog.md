@@ -1,3 +1,6 @@
+3.0.3
+  - fixed remove subscriber
+
 3.0.2
   - updated remove REST API
   - updated StrategyStopout model
