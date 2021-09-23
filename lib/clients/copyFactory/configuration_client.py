@@ -302,12 +302,13 @@ class ConfigurationClient(MetaApiClient):
         }
         return await self._httpClient.request(opts)
 
-    async def remove_subscriber(self, subscriber_id: str):
+    async def remove_subscriber(self, subscriber_id: str, close_instructions: CopyFactoryCloseInstructions = None):
         """Deletes subscriber configuration. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeSubscriber/
 
         Args:
             subscriber_id: Subscriber id.
+            close_instructions: Subscriber close instructions.
 
         Returns:
             A coroutine resolving when subscriber configuration is removed.
@@ -321,4 +322,6 @@ class ConfigurationClient(MetaApiClient):
                 'auth-token': self._token
             }
         }
+        if close_instructions is not None:
+            opts['body'] = close_instructions
         return await self._httpClient.request(opts)
