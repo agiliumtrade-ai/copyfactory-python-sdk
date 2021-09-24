@@ -325,3 +325,29 @@ class ConfigurationClient(MetaApiClient):
         if close_instructions is not None:
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
+
+    async def remove_subscription(self, subscriber_id: str, strategy_id: str,
+                                  close_instructions: CopyFactoryCloseInstructions = None):
+        """Deletes a subscription of subscriber to a strategy. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removeSubscription/
+
+        Args:
+            subscriber_id: Subscriber id.
+            strategy_id: Strategy id.
+            close_instructions: Subscriber close instructions.
+
+        Returns:
+            A coroutine resolving when subscription is removed.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('remove_subscription')
+        opts = {
+            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}/subscriptions/{strategy_id}",
+            'method': 'DELETE',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        if close_instructions is not None:
+            opts['body'] = close_instructions
+        return await self._httpClient.request(opts)
