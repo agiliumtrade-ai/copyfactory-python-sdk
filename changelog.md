@@ -1,5 +1,6 @@
-3.0.3
+3.1.0
   - fixed remove subscriber
+  - added remove subscription method
 
 3.0.2
   - updated remove REST API

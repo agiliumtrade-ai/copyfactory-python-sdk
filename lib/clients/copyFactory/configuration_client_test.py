@@ -506,3 +506,28 @@ class TestConfigurationClient:
             assert err.__str__() == 'You can not invoke remove_subscriber method, because you have connected with ' + \
                                     'account access token. Please use API access token from ' + \
                                     'https://app.metaapi.cloud/token page to invoke this method.'
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_remove_copyfactory_subscription(self):
+        """Should remove CopyFactory subscription via API."""
+        payload = {'mode': 'preserve'}
+        rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/subscribers/' +
+                            'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/subscriptions/ABCD').mock(return_value=Response(204))
+        await copy_factory_client.remove_subscription('e8867baa-5ec2-45ae-9930-4d5cea18d0d6', 'ABCD', payload)
+        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/subscribers/' + \
+               'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/subscriptions/ABCD'
+        assert rsps.calls[0].request.method == 'DELETE'
+        assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
+        assert rsps.calls[0].request.content == json.dumps(payload).encode('utf-8')
+
+    @pytest.mark.asyncio
+    async def test_not_remove_copyfactory_subscription_with_account_token(self):
+        """Should not remove CopyFactory subscription via API with account token."""
+        copy_factory_client = ConfigurationClient(http_client, 'token')
+        try:
+            await copy_factory_client.remove_subscription('e8867baa-5ec2-45ae-9930-4d5cea18d0d6', 'ABCD')
+        except Exception as err:
+            assert err.__str__() == 'You can not invoke remove_subscription method, because you have connected ' \
+                                    'with account access token. Please use API access token from ' \
+                                    'https://app.metaapi.cloud/token page to invoke this method.'
