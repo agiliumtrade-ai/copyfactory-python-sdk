@@ -644,6 +644,8 @@ class CopyFactoryTradingSignal(TypedDict):
     """The signal volume."""
     subscriberVolume: float
     """The volume already open on subscriber side."""
+    subscriberProfit: float
+    """The total profit of the position on subscriber side."""
     closeAfter: datetime
     """The time the signal will be automatically closed at."""
     closeOnly: Optional[bool]
