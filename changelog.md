@@ -1,3 +1,6 @@
+3.1.1
+  - added subscriber profit field to trading signal model
+
 3.1.0
   - fixed remove subscriber
   - added remove subscription method
