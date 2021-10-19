@@ -89,10 +89,10 @@ class CopyFactoryStrategyBreakingNewsFilter(TypedDict):
     """List of breaking news priorities to stop trading on, leave empty to disable breaking news filter. One of high,
     medium, low."""
     closePositionTimeGapInMinutes: Optional[float]
-    """Optional time interval specifying when to force close an already open position after breaking news. Default
+    """Time interval specifying when to force close an already open position after breaking news. Default
     value is 60 minutes."""
     openPositionFollowingTimeGapInMinutes: Optional[float]
-    """Optional time interval specifying when it is allowed to open position after calendar news. Default value is
+    """Time interval specifying when it is allowed to open position after calendar news. Default value is
     60 minutes."""
 
 
@@ -102,22 +102,22 @@ class CopyFactoryStrategyCalendarNewsFilter(TypedDict):
     """List of calendar news priorities to stop trading on, leave empty to disable calendar news filter. One of
     election, high, medium, low."""
     closePositionTimeGapInMinutes: Optional[float]
-    """Optional time interval specifying when to force close an already open position before calendar news. Default
+    """Time interval specifying when to force close an already open position before calendar news. Default
     value is 60 minutes."""
     openPositionPrecedingTimeGapInMinutes: Optional[float]
-    """Optional time interval specifying when it is still allowed to open position before calendar news. Default value
+    """Time interval specifying when it is still allowed to open position before calendar news. Default value
     is 120 minutes."""
     openPositionFollowingTimeGapInMinutes: Optional[float]
-    """Optional time interval specifying when it is allowed to open position after calendar news. Default value is 60
+    """Time interval specifying when it is allowed to open position after calendar news. Default value is 60
     minutes"""
 
 
 class CopyFactoryStrategyNewsFilter(TypedDict):
     """CopyFactory news risk filter."""
     breakingNewsFilter: Optional[CopyFactoryStrategyBreakingNewsFilter]
-    """Optional breaking news filter."""
+    """Breaking news filter."""
     calendarNewsFilter: Optional[CopyFactoryStrategyCalendarNewsFilter]
-    """Optional calendar news filter."""
+    """Calendar news filter."""
 
 
 class CopyFactoryStrategyMaxStopLoss(TypedDict):
@@ -140,7 +140,7 @@ class CopyFactoryStrategyRiskLimit(TypedDict):
     """Whether to force close positions when the risk is reached. If value is false then only the new trades will be
     halted, but existing ones will not be closed"""
     startTime: Optional[datetime]
-    """Optional time to start risk tracking from. All previous trades will be ignored. You can use this value to reset
+    """Time to start risk tracking from. All previous trades will be ignored. You can use this value to reset
     the filter after stopout event."""
 
 
@@ -221,28 +221,28 @@ class CopyFactorySubscriberUpdate(TypedDict):
     name: str
     """Account human-readable name."""
     reservedMarginFraction: Optional[float]
-    """Optional fraction of reserved margin to reduce a risk of margin call. Default is to reserve no margin. We
+    """Fraction of reserved margin to reduce a risk of margin call. Default is to reserve no margin. We
     recommend using maxLeverage setting instead. Specified as a fraction of balance thus the value is usually greater
     than 1."""
     phoneNumbers: Optional[List[str]]
-    """Optional phone numbers to send sms notifications to. Leave empty to receive no sms notifications."""
+    """Phone numbers to send sms notifications to. Leave empty to receive no sms notifications."""
     minTradeAmount: Optional[float]
-    """Optional value of minimal trade size allowed, expressed in amount of account currency. Can be useful if your
+    """Value of minimal trade size allowed, expressed in amount of account currency. Can be useful if your
     broker charges a fixed fee per transaction so that you can skip small trades with high broker commission rates.
-    Default is 100."""
+    Default is 0."""
     closeOnly: Optional[str]
-    """Optional setting which instructs the application not to open new positions. by-symbol means that it is still
+    """Setting which instructs the application not to open new positions. by-symbol means that it is still
     allowed to open new positions with a symbol equal to the symbol of an existing strategy position (can be used to
     gracefully exit strategies trading in netting mode or placing a series of related trades per symbol). immediately
     means to close all positions immediately. One of 'by-position', 'by-symbol', 'immediately'."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
+    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
     this value."""
     riskLimits: Optional[List[CopyFactoryStrategyRiskLimit]]
-    """Optional account risk limits. You can configure trading to be stopped once total drawdown generated during
+    """Account risk limits. You can configure trading to be stopped once total drawdown generated during
     specific period is exceeded. Can be specified either for balance or equity drawdown."""
     maxLeverage: Optional[float]
-    """Optional setting indicating maxumum leverage allowed when opening a new positions. Any trade which results in a
+    """Setting indicating maxumum leverage allowed when opening a new positions. Any trade which results in a
     higher leverage will be discarded."""
     copyStopLoss: Optional[bool]
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
@@ -285,9 +285,9 @@ class CopyFactoryStrategyMagicFilter(TypedDict):
 class CopyFactoryStrategyTimeSettings(TypedDict):
     """CopyFactory strategy time settings."""
     lifetimeInHours: Optional[float]
-    """Optional position lifetime. Default is to keep positions open up to 90 days."""
+    """Position lifetime. Default is to keep positions open up to 90 days."""
     openingIntervalInMinutes: Optional[float]
-    """Optional time interval to copy new positions. Default is to let 1 minute for the position to get copied. If
+    """Time interval to copy new positions. Default is to let 1 minute for the position to get copied. If
     position were not copied during this time, the copying will not be retried anymore."""
 
 
@@ -303,32 +303,32 @@ class CopyFactoryStrategyUpdate(TypedDict):
     accountId: str
     """Id of the MetaApi account providing the strategy."""
     skipPendingOrders: Optional[bool]
-    """Optional flag indicating that pending orders should not be copied. Default is to copy pending orders"""
+    """Flag indicating that pending orders should not be copied. Default is to copy pending orders"""
     commissionScheme: Optional[CopyFactoryStrategyCommissionScheme]
     """Commission scheme allowed by this strategy."""
     maxTradeRisk: Optional[float]
-    """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted to
+    """Max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted to
     match the risk limit. If not, the trade SL will be applied according to the risk limit."""
     reverse: Optional[bool]
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
-    """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
+    """Setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
     specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
     (limit correlations for the account)."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
+    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
     this value."""
     symbolFilter: Optional[CopyFactoryStrategySymbolFilter]
     """Symbol filters which can be used to copy only specific symbols or exclude some symbols from copying."""
     newsFilter: Optional[CopyFactoryStrategyNewsFilter]
     """News risk filter configuration."""
     riskLimits: Optional[List[CopyFactoryStrategyRiskLimit]]
-    """Optional strategy risk limits. You can configure trading to be stopped once total drawdown generated during
+    """Strategy risk limits. You can configure trading to be stopped once total drawdown generated during
     specific period is exceeded. Can be specified either for balance or equity drawdown."""
     maxStopLoss: Optional[CopyFactoryStrategyMaxStopLoss]
-    """Optional stop loss value restriction."""
+    """Stop loss value restriction."""
     maxLeverage: Optional[float]
-    """Optional max leverage risk restriction. All trades resulting in a leverage value higher than specified will
+    """Max leverage risk restriction. All trades resulting in a leverage value higher than specified will
     be skipped."""
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
@@ -345,7 +345,7 @@ class CopyFactoryStrategyUpdate(TypedDict):
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
     magicFilter: Optional[CopyFactoryStrategyMagicFilter]
-    """Optional magic (expert id) filter."""
+    """Magic (expert id) filter."""
     equityCurveFilter: Optional[CopyFactoryStrategyEquityCurveFilter]
     """Filter which permits the trades only if account equity is greater than balance moving average."""
     drawdownFilter: Optional[CopyFactoryStrategyDrawdownFilter]
@@ -409,7 +409,7 @@ class CopyFactoryTransaction(TypedDict):
     subscriberId: str
     """CopyFactory subscriber id."""
     symbol: Optional[str]
-    """Optional symbol traded."""
+    """Symbol traded."""
     subscriberUser: CopyFactorySubscriberOrProviderUser
     """Strategy subscriber."""
     demo: bool
@@ -457,30 +457,30 @@ class CopyFactoryPortfolioStrategyMember(TypedDict):
     multiplier: float
     """Copying multiplier (weight in the portfolio)."""
     skipPendingOrders: Optional[bool]
-    """Optional flag indicating that pending orders should not be copied. Default is to copy pending orders."""
+    """Flag indicating that pending orders should not be copied. Default is to copy pending orders."""
     maxTradeRisk: Optional[float]
-    """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted
+    """Max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted
     to match the risk limit. If not, the trade SL will be applied according to the risk limit."""
     reverse: Optional[bool]
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
-    """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are
+    """Setting indicating whether to enable automatic trade correlation reduction. Possible settings are
     not specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or
     by-account (limit correlations for the account)."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
+    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
     value."""
     symbolFilter: Optional[CopyFactoryStrategySymbolFilter]
     """Symbol filters which can be used to copy only specific symbols or exclude some symbols from copying."""
     newsFilter: Optional[CopyFactoryStrategyNewsFilter]
     """News risk filter configuration."""
     riskLimits: Optional[List[CopyFactoryStrategyRiskLimit]]
-    """Optional strategy risk limits. You can configure trading to be stopped once total drawdown generated during
+    """Strategy risk limits. You can configure trading to be stopped once total drawdown generated during
     specific period is exceeded. Can be specified either for balance or equity drawdown."""
     maxStopLoss: Optional[CopyFactoryStrategyMaxStopLoss]
-    """Optional stop loss value restriction."""
+    """Stop loss value restriction."""
     maxLeverage: Optional[float]
-    """Optional max leverage risk restriction. All trades resulting in a leverage value higher than specified will be
+    """Max leverage risk restriction. All trades resulting in a leverage value higher than specified will be
     skipped."""
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
@@ -510,30 +510,30 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     """Commission scheme allowed by this strategy. By default monthly billing period with no commission is being
     used."""
     skipPendingOrders: Optional[bool]
-    """Optional flag indicating that pending orders should not be copied. Default is to copy pending orders."""
+    """Flag indicating that pending orders should not be copied. Default is to copy pending orders."""
     maxTradeRisk: Optional[float]
-    """Optional max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted
+    """Max risk per trade, expressed as a fraction of 1. If trade has a SL, the trade size will be adjusted
     to match the risk limit. If not, the trade SL will be applied according to the risk limit."""
     reverse: Optional[bool]
     """Flag indicating that the strategy should be copied in a reverse direction."""
     reduceCorrelations: Optional[str]
-    """Optional setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
+    """Setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
     specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
     (limit correlations for the account)."""
     stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Optional stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
+    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
     value."""
     symbolFilter: Optional[CopyFactoryStrategySymbolFilter]
     """Symbol filters which can be used to copy only specific symbols or exclude some symbols from copying."""
     newsFilter: Optional[CopyFactoryStrategyNewsFilter]
     """News risk filter configuration."""
     riskLimits: Optional[List[CopyFactoryStrategyRiskLimit]]
-    """Optional strategy risk limits. You can configure trading to be stopped once total drawdown generated during
+    """Strategy risk limits. You can configure trading to be stopped once total drawdown generated during
     specific period is exceeded. Can be specified either for balance or equity drawdown."""
     maxStopLoss: Optional[CopyFactoryStrategyMaxStopLoss]
-    """Optional stop loss value restriction."""
+    """Stop loss value restriction."""
     maxLeverage: Optional[float]
-    """Optional max leverage risk restriction. All trades resulting in a leverage value higher than specified will be
+    """Max leverage risk restriction. All trades resulting in a leverage value higher than specified will be
     skipped."""
     symbolMapping: Optional[List[CopyFactoryStrategySymbolMapping]]
     """Defines how symbol name should be changed when trading (e.g. when broker uses symbol names with unusual
