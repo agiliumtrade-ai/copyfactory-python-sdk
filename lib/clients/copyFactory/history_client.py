@@ -30,7 +30,7 @@ class HistoryClient(MetaApiClient):
         Args:
             time_from: Time to load transactions from.
             time_till: Time to load transactions till.
-            strategy_ids: Optional list of strategy ids to filter transactions by.
+            strategy_ids: The list of strategy ids to filter transactions by.
             subscriber_ids: The list of CopyFactory subscriber account ids to filter by.
             offset: Pagination offset. Default value is 0.
             limit: Pagination limit. Default value is 1000.
@@ -74,7 +74,7 @@ class HistoryClient(MetaApiClient):
         Args:
             time_from: Time to load transactions from.
             time_till: Time to load transactions till.
-            strategy_ids: Optional list of strategy ids to filter transactions by.
+            strategy_ids: The list of strategy ids to filter transactions by.
             subscriber_ids: The list of CopyFactory subscriber account ids to filter by.
             offset: Pagination offset. Default value is 0.
             limit: Pagination limit. Default value is 1000.

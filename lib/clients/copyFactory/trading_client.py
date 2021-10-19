@@ -91,8 +91,8 @@ class TradingClient(MetaApiClient):
 
         Args:
             subscriber_id: Account id.
-            strategy_ids: Optional array of strategy ids to resynchronize. Default is to synchronize all strategies.
-            position_ids: Optional array of position ids to resynchronize. Default is to synchronize all positions.
+            strategy_ids: Array of strategy ids to resynchronize. Default is to synchronize all strategies.
+            position_ids: Array of position ids to resynchronize. Default is to synchronize all positions.
 
         Returns:
             A coroutine which resolves when resynchronization is scheduled.
