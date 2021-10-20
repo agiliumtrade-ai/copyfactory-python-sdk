@@ -1,3 +1,6 @@
+3.1.5
+  - removed positionLifecycle property
+
 3.1.4
   - updated docs
 
