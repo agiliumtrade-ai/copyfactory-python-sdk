@@ -1,3 +1,6 @@
+3.1.4
+  - updated docs
+
 3.1.3
   - updated docs
 
