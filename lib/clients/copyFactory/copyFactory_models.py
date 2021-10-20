@@ -297,9 +297,6 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Strategy human-readable name."""
     description: str
     """Longer strategy human-readable description."""
-    positionLifecycle: str
-    """Position detection mode. Allowed values are netting (single position per strategy per symbol),
-    hedging (multiple positions per strategy per symbol)"""
     accountId: str
     """Id of the MetaApi account providing the strategy."""
     skipPendingOrders: Optional[bool]

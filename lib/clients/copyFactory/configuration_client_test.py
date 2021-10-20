@@ -60,7 +60,6 @@ class TestConfigurationClient:
             '_id': 'ABCD',
             'platformCommissionRate': 0.01,
             'name': 'Test strategy',
-            'positionLifecycle': 'hedging',
             'accountId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
@@ -108,7 +107,6 @@ class TestConfigurationClient:
             '_id': 'ABCD',
             'platformCommissionRate': 0.01,
             'name': 'Test strategy',
-            'positionLifecycle': 'hedging',
             'accountId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
@@ -155,7 +153,6 @@ class TestConfigurationClient:
         strategy = {
             'name': 'Test strategy',
             'description': 'Test description',
-            'positionLifecycle': 'hedging',
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
                 'value': 0.4,

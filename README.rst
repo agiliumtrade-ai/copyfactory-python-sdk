@@ -122,7 +122,6 @@ In order to configure trade copying you need to:
     await configuration_api.update_strategy(id=strategy_id['id'], strategy={
         'name': 'Test strategy',
         'description': 'Some useful description about your strategy',
-        'positionLifecycle': 'hedging',
         'accountId': master_metaapi_account.id,
         'maxTradeRisk': 0.1,
         'stopOutRisk': {
