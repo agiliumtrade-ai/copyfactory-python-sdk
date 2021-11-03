@@ -196,7 +196,7 @@ class TestConfigurationClient:
     @pytest.mark.asyncio
     async def test_remove_strategy(self):
         """Should remove strategy via API."""
-        payload = {'mode': 'preserve'}
+        payload = {'mode': 'preserve', 'removeAfter': date('2020-08-24T00:00:01.000Z')}
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/strategies/ABCD') \
             .mock(return_value=Response(204))
         await copy_factory_client.remove_strategy('ABCD', payload)
@@ -355,7 +355,7 @@ class TestConfigurationClient:
     @pytest.mark.asyncio
     async def test_remove_portfolio_strategy(self):
         """Should remove portfolio strategy via API."""
-        payload = {'mode': 'preserve'}
+        payload = {'mode': 'preserve', 'removeAfter': date('2020-08-24T00:00:01.000Z')}
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/portfolio-strategies/ABCD')\
             .mock(return_value=Response(204))
         await copy_factory_client.remove_portfolio_strategy('ABCD', payload)
@@ -483,7 +483,7 @@ class TestConfigurationClient:
     @pytest.mark.asyncio
     async def test_remove_copyfactory_subscriber(self):
         """Should remove CopyFactory subscriber via API."""
-        payload = {'mode': 'preserve'}
+        payload = {'mode': 'preserve', 'removeAfter': date('2020-08-24T00:00:01.000Z')}
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/subscribers/' +
                             'e8867baa-5ec2-45ae-9930-4d5cea18d0d6').mock(return_value=Response(204))
         await copy_factory_client.remove_subscriber('e8867baa-5ec2-45ae-9930-4d5cea18d0d6', payload)
@@ -508,7 +508,7 @@ class TestConfigurationClient:
     @pytest.mark.asyncio
     async def test_remove_copyfactory_subscription(self):
         """Should remove CopyFactory subscription via API."""
-        payload = {'mode': 'preserve'}
+        payload = {'mode': 'preserve', 'removeAfter': date('2020-08-24T00:00:01.000Z')}
         rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/subscribers/' +
                             'e8867baa-5ec2-45ae-9930-4d5cea18d0d6/subscriptions/ABCD').mock(return_value=Response(204))
         await copy_factory_client.remove_subscription('e8867baa-5ec2-45ae-9930-4d5cea18d0d6', 'ABCD', payload)

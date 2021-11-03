@@ -138,6 +138,7 @@ class ConfigurationClient(MetaApiClient):
             }
         }
         if close_instructions is not None:
+            format_request(close_instructions)
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
@@ -231,6 +232,7 @@ class ConfigurationClient(MetaApiClient):
             }
         }
         if close_instructions is not None:
+            format_request(close_instructions)
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
@@ -323,6 +325,7 @@ class ConfigurationClient(MetaApiClient):
             }
         }
         if close_instructions is not None:
+            format_request(close_instructions)
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
@@ -349,5 +352,6 @@ class ConfigurationClient(MetaApiClient):
             }
         }
         if close_instructions is not None:
+            format_request(close_instructions)
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
