@@ -651,7 +651,7 @@ class CopyFactoryTradingSignal(TypedDict):
 
 class CopyFactoryCloseInstructions(TypedDict):
     """CopyFactory close instructions"""
-    mode: str
+    mode: Optional[str]
     """Position close mode on strategy or subscription removal. Preserve means that positions will not be closed and
     will not be managed by CopyFactory. close-gracefully-by-position means that positions will continue to be managed
     by CopyFactory, but only close signals will be copied. close-gracefully-by-symbol means that positions will
@@ -659,3 +659,7 @@ class CopyFactoryCloseInstructions(TypedDict):
     symbols which already have positions opened. close-immediately means that all positions will be closed immediately.
     Default is close-immediately (one of 'preserve', 'close-gracefully-by-position', 'close-gracefully-by-symbol',
     'close-immediately')."""
+    removeAfter: Optional[datetime]
+    """Time to force remove object after. The object will be removed after this time, even if positions are not yet
+    closed fully. Default is current date plus 30 days. Can not be less than 30 days or greater than current date plus
+    90 days. The setting is ignored when a subscription is being removed."""
