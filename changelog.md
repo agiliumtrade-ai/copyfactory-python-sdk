@@ -1,3 +1,6 @@
+3.2.0
+  - added includeRemoved and pagination to get_strategies, get_portfolio_strategies, get_subscribers
+
 3.1.6
   - added removeAfter field to closeInstructions
 

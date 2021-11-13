@@ -49,21 +49,35 @@ class ConfigurationClient(MetaApiClient):
         """
         return random_id(64)
 
-    async def get_strategies(self) -> 'List[CopyFactoryStrategy]':
+    async def get_strategies(self, include_removed: bool = None, limit: int = None,
+                             offset: int = None) -> 'List[CopyFactoryStrategy]':
         """Retrieves CopyFactory copy trading strategies. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getStrategies/
+
+        Args:
+            include_removed: Flag instructing to include removed strategies in results.
+            limit: Pagination limit.
+            offset: Pagination offset.
 
         Returns:
             A coroutine resolving with CopyFactory strategies found.
         """
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('get_strategies')
+        qs = {}
+        if include_removed is not None:
+            qs['includeRemoved'] = include_removed
+        if limit is not None:
+            qs['limit'] = limit
+        if offset is not None:
+            qs['offset'] = offset
         opts = {
             'url': f"{self._host}/users/current/configuration/strategies",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
-            }
+            },
+            'params': qs
         }
         result = await self._httpClient.request(opts)
         convert_iso_time_to_date(result)
@@ -142,21 +156,35 @@ class ConfigurationClient(MetaApiClient):
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
-    async def get_portfolio_strategies(self) -> 'List[CopyFactoryPortfolioStrategy]':
+    async def get_portfolio_strategies(self, include_removed: bool = None, limit: int = None,
+                                       offset: int = None) -> 'List[CopyFactoryPortfolioStrategy]':
         """Retrieves CopyFactory copy portfolio strategies. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getPortfolioStrategies/
+
+        Args:
+            include_removed: Flag instructing to include removed portfolio strategies in results.
+            limit: Pagination limit.
+            offset: Pagination offset.
 
         Returns:
             A coroutine resolving with CopyFactory portfolio strategies found.
         """
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('get_portfolio_strategies')
+        qs = {}
+        if include_removed is not None:
+            qs['includeRemoved'] = include_removed
+        if limit is not None:
+            qs['limit'] = limit
+        if offset is not None:
+            qs['offset'] = offset
         opts = {
             'url': f"{self._host}/users/current/configuration/portfolio-strategies",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
-            }
+            },
+            'params': qs
         }
         result = await self._httpClient.request(opts)
         convert_iso_time_to_date(result)
@@ -236,21 +264,35 @@ class ConfigurationClient(MetaApiClient):
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
-    async def get_subscribers(self) -> 'List[CopyFactorySubscriber]':
+    async def get_subscribers(self, include_removed: bool = None, limit: int = None,
+                              offset: int = None) -> 'List[CopyFactorySubscriber]':
         """Returns CopyFactory subscribers the user has configured. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/getSubscribers/
+
+        Args:
+            include_removed: Flag instructing to include removed subscribers in results.
+            limit: Pagination limit.
+            offset: Pagination offset.
 
         Returns:
             A coroutine resolving with subscribers found.
         """
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('get_subscribers')
+        qs = {}
+        if include_removed is not None:
+            qs['includeRemoved'] = include_removed
+        if limit is not None:
+            qs['limit'] = limit
+        if offset is not None:
+            qs['offset'] = offset
         opts = {
             'url': f"{self._host}/users/current/configuration/subscribers",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
-            }
+            },
+            'params': qs
         }
         result = await self._httpClient.request(opts)
         convert_iso_time_to_date(result)
