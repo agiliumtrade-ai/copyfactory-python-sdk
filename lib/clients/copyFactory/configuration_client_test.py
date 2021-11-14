@@ -80,8 +80,9 @@ class TestConfigurationClient:
         }]
         rsps = respx.get(f'{copy_factory_api_url}/users/current/configuration/strategies') \
             .mock(return_value=Response(200, json=expected))
-        strategies = await copy_factory_client.get_strategies()
-        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/strategies'
+        strategies = await copy_factory_client.get_strategies(True, 100, 200)
+        assert rsps.calls[0].request.url == \
+            f'{copy_factory_api_url}/users/current/configuration/strategies?includeRemoved=true&limit=100&offset=200'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['stopOutRisk']['startTime'] = date(expected[0]['stopOutRisk']['startTime'])
@@ -243,9 +244,9 @@ class TestConfigurationClient:
         }]
         rsps = respx.get(f'{copy_factory_api_url}/users/current/configuration/portfolio-strategies') \
             .mock(return_value=Response(200, json=expected))
-        strategies = await copy_factory_client.get_portfolio_strategies()
+        strategies = await copy_factory_client.get_portfolio_strategies(True, 100, 200)
         assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/' \
-                                            f'portfolio-strategies'
+                                            f'portfolio-strategies?includeRemoved=true&limit=100&offset=200'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['members'][0]['stopOutRisk']['startTime'] = \
@@ -393,8 +394,9 @@ class TestConfigurationClient:
         }]
         rsps = respx.get(f'{copy_factory_api_url}/users/current/configuration/subscribers')\
             .mock(return_value=Response(200, json=expected))
-        accounts = await copy_factory_client.get_subscribers()
-        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/subscribers'
+        accounts = await copy_factory_client.get_subscribers(True, 100, 200)
+        assert rsps.calls[0].request.url == \
+            f'{copy_factory_api_url}/users/current/configuration/subscribers?includeRemoved=true&limit=100&offset=200'
         assert rsps.calls[0].request.method == 'GET'
         assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         assert accounts == expected
