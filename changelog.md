@@ -1,3 +1,7 @@
+3.3.0
+  - added remove_portfolio_strategy_member method
+  - added closeOnRemovalMode to strategy, portfolio strategy and portfolio strategy member
+
 3.2.0
   - added includeRemoved and pagination to get_strategies, get_portfolio_strategies, get_subscribers
 

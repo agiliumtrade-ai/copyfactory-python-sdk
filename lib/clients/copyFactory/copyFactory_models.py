@@ -363,6 +363,14 @@ class CopyFactoryStrategy(CopyFactoryStrategyUpdate):
     platformCommissionRate: float
     """Commission rate the platform charges for strategy copying, applied to commissions charged by provider. This
     commission applies only to accounts not managed directly by provider. Should be fraction of 1."""
+    closeOnRemovalMode: Optional[str]
+    """Position close mode on strategy or subscription removal. Preserve means that positions will not be closed and
+    will not be managed by CopyFactory. close-gracefully-by-position means that positions will continue to be managed
+    by CopyFactory, but only close signals will be copied. close-gracefully-by-symbol means that positions will
+    continue to be managed by CopyFactory, but only close signals will be copied or signals to open positions for the
+    symbols which already have positions opened. close-immediately means that all positions will be closed immediately.
+    Default is close-immediately. This field can be changed via remove portfolio member API only. One of preserve,
+    close-gracefully-by-position, close-gracefully-by-symbol, close-immediately."""
 
 
 class CopyFactorySubscriberOrProviderUser(TypedDict):
@@ -493,6 +501,14 @@ class CopyFactoryPortfolioStrategyMember(TypedDict):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    closeOnRemovalMode: Optional[str]
+    """Position close mode on strategy or subscription removal. Preserve means that positions will not be closed and
+    will not be managed by CopyFactory. close-gracefully-by-position means that positions will continue to be managed
+    by CopyFactory, but only close signals will be copied. close-gracefully-by-symbol means that positions will
+    continue to be managed by CopyFactory, but only close signals will be copied or signals to open positions for the
+    symbols which already have positions opened. close-immediately means that all positions will be closed immediately.
+    Default is close-immediately. This field can be changed via remove portfolio member API only. One of preserve,
+    close-gracefully-by-position, close-gracefully-by-symbol, close-immediately."""
 
 
 class CopyFactoryPortfolioStrategyUpdate(TypedDict):
@@ -555,6 +571,14 @@ class CopyFactoryPortfolioStrategy(CopyFactoryPortfolioStrategyUpdate):
     platformCommissionRate: float
     """Commission rate the platform charges for strategy copying, applied to commissions charged by provider. This
     commission applies only to accounts not managed directly by provider. Should be fraction of 1."""
+    closeOnRemovalMode: Optional[str]
+    """Position close mode on strategy or subscription removal. Preserve means that positions will not be closed and
+    will not be managed by CopyFactory. close-gracefully-by-position means that positions will continue to be managed
+    by CopyFactory, but only close signals will be copied. close-gracefully-by-symbol means that positions will
+    continue to be managed by CopyFactory, but only close signals will be copied or signals to open positions for the
+    symbols which already have positions opened. close-immediately means that all positions will be closed immediately.
+    Default is close-immediately. This field can be changed via remove portfolio member API only. One of preserve,
+    close-gracefully-by-position, close-gracefully-by-symbol, close-immediately."""
 
 
 class LogLevel(Enum):
