@@ -379,6 +379,31 @@ class TestConfigurationClient:
 
     @respx.mock
     @pytest.mark.asyncio
+    async def test_remove_portfolio_strategy_member(self):
+        """Should remove portfolio strategy member via API."""
+        payload = {'mode': 'preserve', 'removeAfter': date('2020-08-24T00:00:01.000Z')}
+        rsps = respx.delete(f'{copy_factory_api_url}/users/current/configuration/portfolio-strategies/ABCD'
+                            f'/members/BCDE').mock(return_value=Response(204))
+        await copy_factory_client.remove_portfolio_strategy_member('ABCD', 'BCDE', payload)
+        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/configuration/' \
+                                            f'portfolio-strategies/ABCD/members/BCDE'
+        assert rsps.calls[0].request.method == 'DELETE'
+        assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
+        assert rsps.calls[0].request.content == json.dumps(payload).encode('utf-8')
+
+    @pytest.mark.asyncio
+    async def test_not_remove_portfolio_strategy_member_with_account_token(self):
+        """Should not remove portfolio strategy member with account token."""
+        copy_factory_client = ConfigurationClient(http_client, 'token')
+        try:
+            await copy_factory_client.remove_portfolio_strategy_member('ABCD', 'BCDE')
+        except Exception as err:
+            assert err.__str__() == 'You can not invoke remove_portfolio_strategy_member method, because you have ' \
+                                    'connected with account access token. Please use API access token from ' + \
+                                    'https://app.metaapi.cloud/token page to invoke this method.'
+
+    @respx.mock
+    @pytest.mark.asyncio
     async def test_retrieve_copyfactory_subscribers_from_api(self):
         """Should retrieve CopyFactory subscribers from API."""
         expected = [{

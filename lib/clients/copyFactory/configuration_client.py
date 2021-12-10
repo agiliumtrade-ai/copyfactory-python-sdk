@@ -264,6 +264,34 @@ class ConfigurationClient(MetaApiClient):
             opts['body'] = close_instructions
         return await self._httpClient.request(opts)
 
+    async def remove_portfolio_strategy_member(self, portfolio_id: str, strategy_id: str,
+                                               close_instructions: CopyFactoryCloseInstructions = None):
+        """Deletes a portfolio strategy member. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/configuration/removePortfolioStrategyMember/
+
+        Args:
+            portfolio_id: Portfolio strategy id.
+            strategy_id: Id of the strategy to delete member for.
+            close_instructions: Portfolio close instructions.
+
+        Returns:
+            A coroutine resolving when portfolio strategy member is removed.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('remove_portfolio_strategy_member')
+        opts = {
+            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}"
+                   f"/members/{strategy_id}",
+            'method': 'DELETE',
+            'headers': {
+                'auth-token': self._token
+            }
+        }
+        if close_instructions is not None:
+            format_request(close_instructions)
+            opts['body'] = close_instructions
+        return await self._httpClient.request(opts)
+
     async def get_subscribers(self, include_removed: bool = None, limit: int = None,
                               offset: int = None) -> 'List[CopyFactorySubscriber]':
         """Returns CopyFactory subscribers the user has configured. See
