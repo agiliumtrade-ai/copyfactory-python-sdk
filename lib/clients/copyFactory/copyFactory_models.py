@@ -68,7 +68,9 @@ class StrategyId(TypedDict):
 
 class CopyFactoryStrategyStopOutSettings(TypedDict):
     """CopyFactory strategy stopout settings."""
-    value: float
+    absoluteValue: Optional[float]
+    """Value of the stop out risk, measured in account currency."""
+    relativeValue: Optional[float]
     """Value of the stop out risk, expressed as a fraction of 1."""
     startTime: Optional[datetime]
     """The time to start risk calculation from. All previous trades will be ignored. You can use it to reset the risk
@@ -134,7 +136,9 @@ class CopyFactoryStrategyRiskLimit(TypedDict):
     """Restriction type. One of daily, monthly, or yearly."""
     applyTo: str
     """Account metric to apply limit to. One of balance, equity."""
-    maxRisk: float
+    maxAbsoluteRisk: Optional[float]
+    """Max drawdown allowed, measured in account currency."""
+    maxRelativeRisk: Optional[float]
     """Max drawdown allowed, expressed as a fraction of 1."""
     closePositions: bool
     """Whether to force close positions when the risk is reached. If value is false then only the new trades will be

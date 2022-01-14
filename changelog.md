@@ -1,3 +1,6 @@
+3.3.1
+  - updated stopout settings and risk limit models
+
 3.3.0
   - added remove_portfolio_strategy_member method
   - added closeOnRemovalMode to strategy, portfolio strategy and portfolio strategy member
