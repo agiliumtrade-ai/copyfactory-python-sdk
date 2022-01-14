@@ -63,13 +63,13 @@ class TestConfigurationClient:
             'accountId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
-                'value': 0.4,
+                'relativeValue': 0.4,
                 'startTime': '2020-08-24T00:00:00.000Z'
             },
             'riskLimits': [{
                 'type': 'monthly',
                 'applyTo': 'balance',
-                'maxRisk': 0.5,
+                'maxRelativeRisk': 0.5,
                 'closePositions': False,
                 'startTime': '2020-08-24T00:00:01.000Z'
             }],
@@ -111,13 +111,13 @@ class TestConfigurationClient:
             'accountId': 'e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
-                'value': 0.4,
+                'relativeValue': 0.4,
                 'startTime': '2020-08-24T00:00:00.000Z'
             },
             'riskLimits': [{
                 'type': 'monthly',
                 'applyTo': 'balance',
-                'maxRisk': 0.5,
+                'maxRelativeRisk': 0.5,
                 'closePositions': False,
                 'startTime': '2020-08-24T00:00:01.000Z'
             }],
@@ -156,13 +156,13 @@ class TestConfigurationClient:
             'description': 'Test description',
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
-                'value': 0.4,
+                'relativeValue': 0.4,
                 'startTime': date('2020-08-24T00:00:00.000Z')
             },
             'riskLimits': [{
                 'type': 'monthly',
                 'applyTo': 'balance',
-                'maxRisk': 0.5,
+                'maxRelativeRisk': 0.5,
                 'closePositions': False,
                 'startTime': date('2020-08-24T00:00:01.000Z')
             }],
@@ -228,7 +228,7 @@ class TestConfigurationClient:
             'members': [{
                 'strategyId': 'BCDE',
                 'stopOutRisk': {
-                    'value': 0.4,
+                    'relativeValue': 0.4,
                     'startTime': '2020-08-24T00:00:00.000Z'
                 },
                 'riskLimits': [{
@@ -238,7 +238,7 @@ class TestConfigurationClient:
             }],
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
-                'value': 0.4,
+                'relativeValue': 0.4,
                 'startTime': '2020-08-24T00:00:00.000Z'
             }
         }]
@@ -278,7 +278,7 @@ class TestConfigurationClient:
             'members': [{
                 'strategyId': 'BCDE',
                 'stopOutRisk': {
-                    'value': 0.4,
+                    'relativeValue': 0.4,
                     'startTime': '2020-08-24T00:00:00.000Z'
                 },
                 'riskLimits': [{
@@ -288,7 +288,7 @@ class TestConfigurationClient:
             }],
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
-                'value': 0.4,
+                'relativeValue': 0.4,
                 'startTime': '2020-08-24T00:00:00.000Z'
             }
         }
@@ -328,7 +328,7 @@ class TestConfigurationClient:
             }],
             'maxTradeRisk': 0.1,
             'stopOutRisk': {
-                'value': 0.4,
+                'relativeValue': 0.4,
                 'startTime': '2020-08-24T00:00:00.000Z'
             }
         }
