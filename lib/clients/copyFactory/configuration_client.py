@@ -4,6 +4,7 @@ from .copyFactory_models import StrategyId, CopyFactoryStrategyUpdate, CopyFacto
     CopyFactorySubscriber, CopyFactoryStrategy, CopyFactoryPortfolioStrategy, \
     CopyFactoryPortfolioStrategyUpdate, CopyFactoryCloseInstructions
 from typing import List
+from ..domain_client import DomainClient
 from copy import deepcopy
 
 
@@ -11,16 +12,14 @@ class ConfigurationClient(MetaApiClient):
     """metaapi.cloud CopyFactory configuration API (trade copying configuration API) client (see
     https://metaapi.cloud/docs/copyfactory/)"""
 
-    def __init__(self, http_client, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
+    def __init__(self, domain_client: DomainClient):
         """Inits CopyFactory configuration API client instance.
 
         Args:
-            http_client: HTTP client.
-            token: Authorization token.
-            domain: Domain to connect to, default is agiliumtrade.agiliumtrade.ai.
+            domain_client: Domain client.
         """
-        super().__init__(http_client, token, domain)
-        self._host = f'https://copyfactory-application-history-master-v1.{domain}'
+        super().__init__(domain_client)
+        self._domainClient = domain_client
 
     async def generate_strategy_id(self) -> StrategyId:
         """Retrieves new unused strategy id. Method is accessible only with API access token. See
@@ -32,13 +31,13 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('generate_strategy_id')
         opts = {
-            'url': f"{self._host}/users/current/configuration/unused-strategy-id",
+            'url': f"/users/current/configuration/unused-strategy-id",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             }
         }
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     @staticmethod
     def generate_account_id() -> str:
@@ -72,14 +71,14 @@ class ConfigurationClient(MetaApiClient):
         if offset is not None:
             qs['offset'] = offset
         opts = {
-            'url': f"{self._host}/users/current/configuration/strategies",
+            'url': f"/users/current/configuration/strategies",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             },
             'params': qs
         }
-        result = await self._httpClient.request(opts)
+        result = await self._domainClient.request_copyfactory(opts, True)
         convert_iso_time_to_date(result)
         return result
 
@@ -96,13 +95,13 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('get_strategy')
         opts = {
-            'url': f"{self._host}/users/current/configuration/strategies/{strategy_id}",
+            'url': f"/users/current/configuration/strategies/{strategy_id}",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             }
         }
-        strategy = await self._httpClient.request(opts)
+        strategy = await self._domainClient.request_copyfactory(opts)
         convert_iso_time_to_date(strategy)
         return strategy
 
@@ -122,14 +121,14 @@ class ConfigurationClient(MetaApiClient):
         payload = deepcopy(strategy)
         format_request(payload)
         opts = {
-            'url': f"{self._host}/users/current/configuration/strategies/{strategy_id}",
+            'url': f"/users/current/configuration/strategies/{strategy_id}",
             'method': 'PUT',
             'headers': {
                 'auth-token': self._token
             },
             'body': payload
         }
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     async def remove_strategy(self, strategy_id: str, close_instructions: CopyFactoryCloseInstructions = None):
         """Deletes a CopyFactory strategy. See
@@ -145,7 +144,7 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('remove_strategy')
         opts = {
-            'url': f"{self._host}/users/current/configuration/strategies/{strategy_id}",
+            'url': f"/users/current/configuration/strategies/{strategy_id}",
             'method': 'DELETE',
             'headers': {
                 'auth-token': self._token
@@ -154,7 +153,7 @@ class ConfigurationClient(MetaApiClient):
         if close_instructions is not None:
             format_request(close_instructions)
             opts['body'] = close_instructions
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     async def get_portfolio_strategies(self, include_removed: bool = None, limit: int = None,
                                        offset: int = None) -> 'List[CopyFactoryPortfolioStrategy]':
@@ -179,14 +178,14 @@ class ConfigurationClient(MetaApiClient):
         if offset is not None:
             qs['offset'] = offset
         opts = {
-            'url': f"{self._host}/users/current/configuration/portfolio-strategies",
+            'url': f"/users/current/configuration/portfolio-strategies",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             },
             'params': qs
         }
-        result = await self._httpClient.request(opts)
+        result = await self._domainClient.request_copyfactory(opts, True)
         convert_iso_time_to_date(result)
         return result
 
@@ -203,13 +202,13 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('get_portfolio_strategy')
         opts = {
-            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}",
+            'url': f"/users/current/configuration/portfolio-strategies/{portfolio_id}",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             }
         }
-        strategy = await self._httpClient.request(opts)
+        strategy = await self._domainClient.request_copyfactory(opts)
         convert_iso_time_to_date(strategy)
         return strategy
 
@@ -229,14 +228,14 @@ class ConfigurationClient(MetaApiClient):
         payload = deepcopy(portfolio)
         format_request(payload)
         opts = {
-            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}",
+            'url': f"/users/current/configuration/portfolio-strategies/{portfolio_id}",
             'method': 'PUT',
             'headers': {
                 'auth-token': self._token
             },
             'body': payload
         }
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     async def remove_portfolio_strategy(self, portfolio_id: str,
                                         close_instructions: CopyFactoryCloseInstructions = None):
@@ -253,7 +252,7 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('remove_portfolio_strategy')
         opts = {
-            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}",
+            'url': f"/users/current/configuration/portfolio-strategies/{portfolio_id}",
             'method': 'DELETE',
             'headers': {
                 'auth-token': self._token
@@ -262,7 +261,7 @@ class ConfigurationClient(MetaApiClient):
         if close_instructions is not None:
             format_request(close_instructions)
             opts['body'] = close_instructions
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     async def remove_portfolio_strategy_member(self, portfolio_id: str, strategy_id: str,
                                                close_instructions: CopyFactoryCloseInstructions = None):
@@ -280,7 +279,7 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('remove_portfolio_strategy_member')
         opts = {
-            'url': f"{self._host}/users/current/configuration/portfolio-strategies/{portfolio_id}"
+            'url': f"/users/current/configuration/portfolio-strategies/{portfolio_id}"
                    f"/members/{strategy_id}",
             'method': 'DELETE',
             'headers': {
@@ -290,7 +289,7 @@ class ConfigurationClient(MetaApiClient):
         if close_instructions is not None:
             format_request(close_instructions)
             opts['body'] = close_instructions
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     async def get_subscribers(self, include_removed: bool = None, limit: int = None,
                               offset: int = None) -> 'List[CopyFactorySubscriber]':
@@ -315,14 +314,14 @@ class ConfigurationClient(MetaApiClient):
         if offset is not None:
             qs['offset'] = offset
         opts = {
-            'url': f"{self._host}/users/current/configuration/subscribers",
+            'url': f"/users/current/configuration/subscribers",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             },
             'params': qs
         }
-        result = await self._httpClient.request(opts)
+        result = await self._domainClient.request_copyfactory(opts, True)
         convert_iso_time_to_date(result)
         return result
 
@@ -339,13 +338,13 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('get_subscriber')
         opts = {
-            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}",
+            'url': f"/users/current/configuration/subscribers/{subscriber_id}",
             'method': 'GET',
             'headers': {
                 'auth-token': self._token
             }
         }
-        subscriber = await self._httpClient.request(opts)
+        subscriber = await self._domainClient.request_copyfactory(opts)
         convert_iso_time_to_date(subscriber)
         return subscriber
 
@@ -365,14 +364,14 @@ class ConfigurationClient(MetaApiClient):
         payload = deepcopy(subscriber)
         format_request(payload)
         opts = {
-            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}",
+            'url': f"/users/current/configuration/subscribers/{subscriber_id}",
             'method': 'PUT',
             'headers': {
                 'auth-token': self._token
             },
             'body': payload
         }
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     async def remove_subscriber(self, subscriber_id: str, close_instructions: CopyFactoryCloseInstructions = None):
         """Deletes subscriber configuration. See
@@ -388,7 +387,7 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('remove_subscriber')
         opts = {
-            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}",
+            'url': f"/users/current/configuration/subscribers/{subscriber_id}",
             'method': 'DELETE',
             'headers': {
                 'auth-token': self._token
@@ -397,7 +396,7 @@ class ConfigurationClient(MetaApiClient):
         if close_instructions is not None:
             format_request(close_instructions)
             opts['body'] = close_instructions
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
 
     async def remove_subscription(self, subscriber_id: str, strategy_id: str,
                                   close_instructions: CopyFactoryCloseInstructions = None):
@@ -415,7 +414,7 @@ class ConfigurationClient(MetaApiClient):
         if self._is_not_jwt_token():
             return self._handle_no_access_exception('remove_subscription')
         opts = {
-            'url': f"{self._host}/users/current/configuration/subscribers/{subscriber_id}/subscriptions/{strategy_id}",
+            'url': f"/users/current/configuration/subscribers/{subscriber_id}/subscriptions/{strategy_id}",
             'method': 'DELETE',
             'headers': {
                 'auth-token': self._token
@@ -424,4 +423,4 @@ class ConfigurationClient(MetaApiClient):
         if close_instructions is not None:
             format_request(close_instructions)
             opts['body'] = close_instructions
-        return await self._httpClient.request(opts)
+        return await self._domainClient.request_copyfactory(opts)
