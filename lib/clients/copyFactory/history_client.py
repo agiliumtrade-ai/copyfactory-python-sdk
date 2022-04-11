@@ -3,22 +3,21 @@ from ...models import format_date, convert_iso_time_to_date
 from .copyFactory_models import CopyFactoryTransaction
 from datetime import datetime
 from typing import List
+from ..domain_client import DomainClient
 
 
 class HistoryClient(MetaApiClient):
     """metaapi.cloud CopyFactory history API (trade copying history API) client (see
     https://metaapi.cloud/docs/copyfactory/)"""
 
-    def __init__(self, http_client, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
+    def __init__(self, domain_client: DomainClient):
         """Inits CopyFactory history API client instance.
 
         Args:
-            http_client: HTTP client.
-            token: Authorization token.
-            domain: Domain to connect to, default is agiliumtrade.agiliumtrade.ai.
+            domain_client: Domain client.
         """
-        super().__init__(http_client, token, domain)
-        self._host = f'https://copyfactory-application-history-master-v1.{domain}'
+        super().__init__(domain_client)
+        self._domainClient = domain_client
 
     async def get_provided_transactions(self, time_from: datetime, time_till: datetime,
                                         strategy_ids: List[str] = None, subscriber_ids: List[str] = None,
@@ -53,14 +52,14 @@ class HistoryClient(MetaApiClient):
         if limit:
             qs['limit'] = limit
         opts = {
-          'url': f'{self._host}/users/current/provided-transactions',
+          'url': f'/users/current/provided-transactions',
           'method': 'GET',
           'headers': {
             'auth-token': self._token
           },
           'params': qs
         }
-        transactions = await self._httpClient.request(opts)
+        transactions = await self._domainClient.request_copyfactory(opts, True)
         convert_iso_time_to_date(transactions)
         return transactions
 
@@ -97,13 +96,13 @@ class HistoryClient(MetaApiClient):
         if limit:
             qs['limit'] = limit
         opts = {
-          'url': f'{self._host}/users/current/subscription-transactions',
+          'url': f'/users/current/subscription-transactions',
           'method': 'GET',
           'headers': {
             'auth-token': self._token
           },
           'params': qs
         }
-        transactions = await self._httpClient.request(opts)
+        transactions = await self._domainClient.request_copyfactory(opts, True)
         convert_iso_time_to_date(transactions)
         return transactions

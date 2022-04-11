@@ -1,20 +1,18 @@
 from .methodAccessException import MethodAccessException
+from .domain_client import DomainClient
 
 
 class MetaApiClient:
     """metaapi.cloud MetaTrader API client."""
 
-    def __init__(self, http_client, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
+    def __init__(self, domain_client: DomainClient):
         """Inits MetaTrader API client instance.
 
         Args:
-            http_client: HTTP client.
-            token: Authorization token.
-            domain: Domain to connect to, default is agiliumtrade.agiliumtrade.ai.
+            domain_client: Domain client.
         """
-        self._httpClient = http_client
-        self._host = f'https://mt-provisioning-api-v1.{domain}'
-        self._token = token
+        self._domainClient = domain_client
+        self._token = domain_client.token
 
     @property
     def _token_type(self) -> str:

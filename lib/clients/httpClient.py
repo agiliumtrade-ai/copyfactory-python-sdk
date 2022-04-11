@@ -28,21 +28,47 @@ class RequestOptions(TypedDict):
 
 class HttpClient:
     """HTTP client library based on requests module."""
-    def __init__(self, timeout: float = None, retry_opts=None):
+    def __init__(self, timeout: float = 10, extended_timeout: float = 70, retry_opts=None):
         """Inits HttpClient class instance.
 
         Args:
             timeout: Request timeout in seconds.
+            extended_timeout: Extended request timeout in seconds.
+            retry_opts: Retry options.
         """
-        timeout = timeout or 60
         if retry_opts is None:
             retry_opts = {}
         self._timeout = timeout
+        self._extendedTimeout = extended_timeout
         self._retries = retry_opts['retries'] if 'retries' in retry_opts else 5
         self._minRetryDelayInSeconds = retry_opts['minDelayInSeconds'] if 'minDelayInSeconds' in retry_opts else 1
         self._maxRetryDelayInSeconds = retry_opts['maxDelayInSeconds'] if 'maxDelayInSeconds' in retry_opts else 30
 
-    async def request(self, options: RequestOptions, retry_counter: int = 0, end_time: float = None) -> Response:
+    async def request(self, options: dict, is_extended_timeout: bool = False):
+        """Performs a request. Response errors are returned as ApiError or subclasses.
+
+        Args:
+            options: Request options.
+            is_extended_timeout: Whether to run the request with an extended timeout.
+
+        Returns:
+            Request result.
+        """
+        options['timeout'] = self._extendedTimeout if is_extended_timeout else self._timeout
+        try:
+            response = await self._make_request(options)
+            response.raise_for_status()
+            if response.content:
+                try:
+                    response = response.json()
+                except Exception as err:
+                    print('Error parsing json', err)
+        except HTTPError as err:
+            raise self._convert_error(err)
+        return response
+
+    async def request_with_failover(self, options: RequestOptions, retry_counter: int = 0, end_time: float = None) \
+            -> Response:
         """Performs a request. Response errors are returned as ApiException or subclasses.
 
         Args:
@@ -68,10 +94,10 @@ class HttpClient:
                     print('Error parsing json', err)
         except HTTPError as err:
             retry_counter = await self._handle_error(err, retry_counter, end_time)
-            return await self.request(options, retry_counter, end_time)
+            return await self.request_with_failover(options, retry_counter, end_time)
         if retry_after_seconds:
             await self._handle_retry(end_time, retry_after_seconds)
-            response = await self.request(options, retry_counter, end_time)
+            response = await self.request_with_failover(options, retry_counter, end_time)
         return response
 
     async def _make_request(self, options: RequestOptions) -> Response:
@@ -90,7 +116,7 @@ class HttpClient:
         if end_time > datetime.now().timestamp() + retry_after:
             await asyncio.sleep(retry_after)
         else:
-            raise TimeoutException('Timed out waiting for the end of the process of calculating metrics')
+            raise TimeoutException('Timed out waiting for the response')
 
     async def _handle_error(self, err, retry_counter: int, end_time: float):
         if err.__class__.__name__ == 'ConnectTimeout':
@@ -110,12 +136,17 @@ class HttpClient:
         raise error
 
     def _convert_error(self, err: HTTPError):
+        if err.__class__.__name__ == 'ConnectTimeout':
+            return err
         try:
             response: ExceptionMessage or TypedDict = json.loads(err.response.text)
         except Exception:
             response = {}
-        err_message = response['message'] if 'message' in response else err.response.reason_phrase
-        status = err.response.status_code
+        err_message = response['message'] if 'message' in response else (
+            err.response.reason_phrase if hasattr(err, 'response') else None)
+        status = None
+        if hasattr(err, 'response'):
+            status = err.response.status_code
         if status == 400:
             details = response['details'] if 'details' in response else []
             return ValidationException(err_message, details)

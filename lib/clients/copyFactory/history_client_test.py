@@ -1,21 +1,22 @@
-from ..httpClient import HttpClient
 from .history_client import HistoryClient
 from ...models import date, format_date
 from datetime import datetime
 import pytest
 import respx
-from httpx import Response
-copy_factory_api_url = 'https://copyfactory-application-history-master-v1.agiliumtrade.agiliumtrade.ai'
-http_client = HttpClient()
-history_client = HistoryClient(http_client, 'header.payload.sign')
+from mock import MagicMock, AsyncMock
+domain_client = MagicMock()
+history_client = HistoryClient(domain_client)
+token = 'header.payload.sign'
 
 
 @pytest.fixture(autouse=True)
 async def run_around_tests():
-    global http_client
+    global domain_client
     global history_client
-    http_client = HttpClient()
-    history_client = HistoryClient(http_client, 'header.payload.sign')
+    domain_client = MagicMock()
+    domain_client.request_copyfactory = AsyncMock()
+    domain_client.token = token
+    history_client = HistoryClient(domain_client)
 
 
 class TestHistoryClient:
@@ -54,25 +55,35 @@ class TestHistoryClient:
         }]
         time_from = datetime.now()
         time_till = datetime.now()
-        rsps = respx.get(url__startswith=f'{copy_factory_api_url}/users/current/provided-transactions') \
-            .mock(return_value=Response(200, json=expected))
+        domain_client.request_copyfactory = AsyncMock(return_value=expected)
         accounts = await history_client.get_provided_transactions(
             time_from, time_till, ['ABCD'], ['e8867baa-5ec2-45ae-9930-4d5cea18d0d6'], 100, 200)
-        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/provided-transactions' \
-                                            f'?from={format_date(time_from).replace(":", "%3A")}&' \
-                                            f'till={format_date(time_till).replace(":", "%3A")}&strategyId=ABCD&' \
-                                            f'subscriberId=e8867baa-5ec2-45ae-9930-4d5cea18d0d6&offset=100&limit=200'
-        assert rsps.calls[0].request.method == 'GET'
-        assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['time'] = date(expected[0]['time'])
         assert accounts == expected
+        domain_client.request_copyfactory.assert_called_with({
+            'url': '/users/current/provided-transactions',
+            'method': 'GET',
+            'headers': {
+                'auth-token': token
+            },
+            'params': {
+                'from': format_date(time_from),
+                'till': format_date(time_till),
+                'strategyId': ['ABCD'],
+                'subscriberId': ['e8867baa-5ec2-45ae-9930-4d5cea18d0d6'],
+                'offset': 100,
+                'limit': 200
+            },
+        }, True)
 
     @pytest.mark.asyncio
     async def test_not_retrieve_transactions_for_provided_strategies_with_account_token(self):
         """Should not retrieve transactions on provided strategies from API with account token."""
-        history_client = HistoryClient(http_client, 'token')
+        domain_client.token = 'token'
+        history_client = HistoryClient(domain_client)
         try:
             await history_client.get_provided_transactions(datetime.now(), datetime.now())
+            pytest.fail()
         except Exception as err:
             assert err.__str__() == 'You can not invoke get_provided_transactions method, because ' + \
                    'you have connected with account access token. Please use API access token from ' + \
@@ -113,23 +124,31 @@ class TestHistoryClient:
         }]
         time_from = datetime.now()
         time_till = datetime.now()
-        rsps = respx.get(f'{copy_factory_api_url}/users/current/subscription-transactions') \
-            .mock(return_value=Response(200, json=expected))
+        domain_client.request_copyfactory = AsyncMock(return_value=expected)
         accounts = await history_client.get_subscription_transactions(
             time_from, time_till, ['ABCD'], ['e8867baa-5ec2-45ae-9930-4d5cea18d0d6'], 100, 200)
-        assert rsps.calls[0].request.url == f'{copy_factory_api_url}/users/current/subscription-transactions' \
-                                            f'?from={format_date(time_from).replace(":", "%3A")}&' \
-                                            f'till={format_date(time_till).replace(":", "%3A")}&strategyId=ABCD&' \
-                                            f'subscriberId=e8867baa-5ec2-45ae-9930-4d5cea18d0d6&offset=100&limit=200'
-        assert rsps.calls[0].request.method == 'GET'
-        assert rsps.calls[0].request.headers['auth-token'] == 'header.payload.sign'
         expected[0]['time'] = date(expected[0]['time'])
         assert accounts == expected
+        domain_client.request_copyfactory.assert_called_with({
+            'url': '/users/current/subscription-transactions',
+            'method': 'GET',
+            'headers': {
+                'auth-token': token
+            },
+            'params': {
+                'from': format_date(time_from),
+                'till': format_date(time_till),
+                'strategyId': ['ABCD'],
+                'subscriberId': ['e8867baa-5ec2-45ae-9930-4d5cea18d0d6'],
+                'offset': 100,
+                'limit': 200
+            },
+        }, True)
 
     @pytest.mark.asyncio
     async def test_not_retrieve_transactions_for_subscribed_strategies_with_account_token(self):
         """Should not retrieve transactions on strategies subscribed to from API with account token."""
-        history_client = HistoryClient(http_client, 'token')
+        history_client = HistoryClient(domain_client)
         try:
             await history_client.get_subscription_transactions(datetime.now(), datetime.now())
         except Exception as err:

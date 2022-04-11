@@ -59,8 +59,9 @@ async def external_signal():
 
         # send external signal
         trading_api = copy_factory.trading_api
-        signal_id = trading_api.generate_signal_id()
-        await trading_api.update_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
+        signal_client = await trading_api.get_signal_client(slave_metaapi_account.id)
+        signal_id = signal_client.generate_signal_id()
+        await signal_client.update_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
             'symbol': 'EURUSD',
             'type': 'POSITION_TYPE_BUY',
             'time': datetime.now(),
@@ -70,10 +71,10 @@ async def external_signal():
         await asyncio.sleep(10)
 
         # output trading signals
-        print(await trading_api.get_trading_signals(slave_metaapi_account.id))
+        print(await signal_client.get_trading_signals(slave_metaapi_account.id))
 
         # remove external signal
-        await trading_api.remove_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
+        await signal_client.remove_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
             'time': datetime.now()
         })
     except Exception as err:

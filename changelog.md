@@ -1,3 +1,9 @@
+5.1.0
+  - removed stop out risk from models
+  - added stopout listener
+  - breaking change: signal methods moved to a separate class
+  - implemented region support
+  
 3.3.1
   - updated stopout settings and risk limit models
 

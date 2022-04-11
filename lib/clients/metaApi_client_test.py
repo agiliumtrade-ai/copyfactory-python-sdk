@@ -1,16 +1,18 @@
 from .httpClient import HttpClient
 from .metaApi_client import MetaApiClient
+from mock import MagicMock
 import pytest
-http_client = HttpClient()
-api_client = MetaApiClient(http_client, 'token')
+domain_client = MagicMock()
+api_client = MetaApiClient(domain_client)
 
 
 @pytest.fixture(autouse=True)
 async def run_around_tests():
-    global http_client
-    http_client = HttpClient()
+    global domain_client
+    domain_client = MagicMock()
+    domain_client.token = 'token'
     global api_client
-    api_client = MetaApiClient(http_client, 'token')
+    api_client = MetaApiClient(domain_client)
     yield
 
 
@@ -23,7 +25,8 @@ class TestMetaApiClient:
     @pytest.mark.asyncio
     async def test_return_api_token_type(self):
         """Should return api token type."""
-        api_client = MetaApiClient(http_client, 'header.payload.sign')
+        domain_client.token = 'header.payload.sign'
+        api_client = MetaApiClient(domain_client)
         assert api_client._token_type == 'api'
 
     @pytest.mark.asyncio
@@ -34,7 +37,8 @@ class TestMetaApiClient:
     @pytest.mark.asyncio
     async def test_check_token_not_account(self):
         """Should check that current token is not account token."""
-        api_client = MetaApiClient(http_client, 'header.payload.sign')
+        domain_client.token = 'header.payload.sign'
+        api_client = MetaApiClient(domain_client)
         assert api_client._is_not_account_token()
 
     @pytest.mark.asyncio
@@ -50,7 +54,8 @@ class TestMetaApiClient:
     @pytest.mark.asyncio
     async def test_handle_no_access_exception_with_api_token(self):
         """Should handle no access exception with api token."""
-        api_client = MetaApiClient(http_client, 'header.payload.sign')
+        domain_client.token = 'header.payload.sign'
+        api_client = MetaApiClient(domain_client)
         try:
             api_client._handle_no_access_exception('methodName')
         except Exception as err:

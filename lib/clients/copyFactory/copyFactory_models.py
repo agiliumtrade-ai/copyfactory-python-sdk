@@ -66,17 +66,6 @@ class StrategyId(TypedDict):
     """Strategy id"""
 
 
-class CopyFactoryStrategyStopOutSettings(TypedDict):
-    """CopyFactory strategy stopout settings."""
-    absoluteValue: Optional[float]
-    """Value of the stop out risk, measured in account currency."""
-    relativeValue: Optional[float]
-    """Value of the stop out risk, expressed as a fraction of 1."""
-    startTime: Optional[datetime]
-    """The time to start risk calculation from. All previous trades will be ignored. You can use it to reset the risk
-    counter after a stopout event."""
-
-
 class CopyFactoryStrategySymbolFilter(TypedDict):
     """CopyFactory symbol filter."""
     included: List[str]
@@ -186,9 +175,6 @@ class CopyFactoryStrategySubscription(TypedDict):
     """Setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
     specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
     (limit correlations for the account)."""
-    stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
-    this value."""
     symbolFilter: Optional[CopyFactoryStrategySymbolFilter]
     """Symbol filter which can be used to copy only specific symbols or exclude some symbols from copying."""
     newsFilter: Optional[CopyFactoryStrategyNewsFilter]
@@ -211,6 +197,9 @@ class CopyFactoryStrategySubscription(TypedDict):
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
     copyTakeProfit: Optional[bool]
     """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    allowedSides: Optional[List[str]]
+    """Trade sides which will be copied. Buy trades only, sell trades only or all trades. Default is to copy
+    all trades."""
     minTradeVolume: Optional[float]
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
@@ -239,9 +228,6 @@ class CopyFactorySubscriberUpdate(TypedDict):
     allowed to open new positions with a symbol equal to the symbol of an existing strategy position (can be used to
     gracefully exit strategies trading in netting mode or placing a series of related trades per symbol). immediately
     means to close all positions immediately. One of 'by-position', 'by-symbol', 'immediately'."""
-    stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
-    this value."""
     riskLimits: Optional[List[CopyFactoryStrategyRiskLimit]]
     """Account risk limits. You can configure trading to be stopped once total drawdown generated during
     specific period is exceeded. Can be specified either for balance or equity drawdown."""
@@ -252,6 +238,9 @@ class CopyFactorySubscriberUpdate(TypedDict):
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
     copyTakeProfit: Optional[bool]
     """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    allowedSides: Optional[List[str]]
+    """Trade sides which will be copied. Buy trades only, sell trades only or all trades. Default is to copy
+    all trades."""
     minTradeVolume: Optional[float]
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
@@ -316,9 +305,6 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
     specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
     (limit correlations for the account)."""
-    stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches
-    this value."""
     symbolFilter: Optional[CopyFactoryStrategySymbolFilter]
     """Symbol filters which can be used to copy only specific symbols or exclude some symbols from copying."""
     newsFilter: Optional[CopyFactoryStrategyNewsFilter]
@@ -341,6 +327,9 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
     copyTakeProfit: Optional[bool]
     """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    allowedSides: Optional[List[str]]
+    """Trade sides which will be copied. Buy trades only, sell trades only or all trades. Default is to copy
+    all trades."""
     minTradeVolume: Optional[float]
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
@@ -476,9 +465,6 @@ class CopyFactoryPortfolioStrategyMember(TypedDict):
     """Setting indicating whether to enable automatic trade correlation reduction. Possible settings are
     not specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or
     by-account (limit correlations for the account)."""
-    stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
-    value."""
     symbolFilter: Optional[CopyFactoryStrategySymbolFilter]
     """Symbol filters which can be used to copy only specific symbols or exclude some symbols from copying."""
     newsFilter: Optional[CopyFactoryStrategyNewsFilter]
@@ -501,6 +487,9 @@ class CopyFactoryPortfolioStrategyMember(TypedDict):
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
     copyTakeProfit: Optional[bool]
     """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    allowedSides: Optional[List[str]]
+    """Trade sides which will be copied. Buy trades only, sell trades only or all trades. Default is to copy
+    all trades."""
     minTradeVolume: Optional[float]
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
@@ -537,9 +526,6 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     """Setting indicating whether to enable automatic trade correlation reduction. Possible settings are not
     specified (disable correlation risk restrictions), by-strategy (limit correlations for the strategy) or by-account
     (limit correlations for the account)."""
-    stopOutRisk: Optional[CopyFactoryStrategyStopOutSettings]
-    """Stop out setting. All trading will be terminated and positions closed once equity drawdown reaches this
-    value."""
     symbolFilter: Optional[CopyFactoryStrategySymbolFilter]
     """Symbol filters which can be used to copy only specific symbols or exclude some symbols from copying."""
     newsFilter: Optional[CopyFactoryStrategyNewsFilter]
@@ -562,6 +548,9 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     """Flag indicating whether stop loss should be copied. Default is to copy stop loss."""
     copyTakeProfit: Optional[bool]
     """Flag indicating whether take profit should be copied. Default is to copy take profit."""
+    allowedSides: Optional[List[str]]
+    """Trade sides which will be copied. Buy trades only, sell trades only or all trades. Default is to copy
+    all trades."""
     minTradeVolume: Optional[float]
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]

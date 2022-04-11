@@ -1,4 +1,5 @@
 from .clients.httpClient import HttpClient
+from .clients.domain_client import DomainClient
 from .clients.copyFactory.configuration_client import ConfigurationClient
 from .clients.copyFactory.history_client import HistoryClient
 from .clients.copyFactory.trading_client import TradingClient
@@ -17,9 +18,11 @@ class RetryOpts(TypedDict):
 
 class CopyFactoryOpts(TypedDict):
     """CopyFactory options"""
-    domain: str
+    domain: Optional[str]
     """Domain to connect to."""
-    requestTimeout: float
+    extendedTimeout: Optional[float]
+    """Timeout for extended http requests in seconds."""
+    requestTimeout: Optional[float]
     """Timeout for http requests in seconds."""
     retryOpts: Optional[RetryOpts]
     """Options for request retries."""
@@ -37,12 +40,14 @@ class CopyFactory:
         """
         opts: CopyFactoryOpts = opts or {}
         domain = opts['domain'] if 'domain' in opts else 'agiliumtrade.agiliumtrade.ai'
-        request_timeout = opts['requestTimeout'] if 'requestTimeout' in opts else 60
+        request_timeout = opts['requestTimeout'] if 'requestTimeout' in opts else 10
+        request_extended_timeout = opts['extendedTimeout'] if 'extendedTimeout' in opts else 70
         retry_opts = opts['retryOpts'] if 'retryOpts' in opts else {}
-        http_client = HttpClient(request_timeout, retry_opts)
-        self._configurationClient = ConfigurationClient(http_client, token, domain)
-        self._historyClient = HistoryClient(http_client, token, domain)
-        self._tradingClient = TradingClient(http_client, token, domain)
+        http_client = HttpClient(request_timeout, request_extended_timeout, retry_opts)
+        self._domainClient = DomainClient(http_client, token, domain)
+        self._configurationClient = ConfigurationClient(self._domainClient)
+        self._historyClient = HistoryClient(self._domainClient)
+        self._tradingClient = TradingClient(self._domainClient)
 
     @property
     def configuration_api(self) -> ConfigurationClient:

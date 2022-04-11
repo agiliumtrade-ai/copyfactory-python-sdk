@@ -5,7 +5,7 @@ import iso8601
 import random
 import string
 import pytz
-import re
+import asyncio
 
 
 def date(date_time: str or float or int or datetime) -> datetime:
@@ -90,3 +90,18 @@ def format_request(data: dict or list):
                     format_request(item)
             elif isinstance(value, dict):
                 format_request(value)
+
+
+async def promise_any(coroutines):
+    exception_task = None
+    while len(coroutines):
+        done, coroutines = await asyncio.wait(coroutines, return_when=asyncio.FIRST_COMPLETED)
+        for task in done:
+            if not exception_task and task.exception():
+                exception_task = task
+            else:
+                for wait_task in coroutines:
+                    wait_task.cancel()
+                return task.result()
+
+    return exception_task.result()
