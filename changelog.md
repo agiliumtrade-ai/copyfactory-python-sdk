@@ -1,3 +1,6 @@
+5.2.0
+  - added get_strategy_log method
+
 5.1.0
   - removed stop out risk from models
   - added stopout listener

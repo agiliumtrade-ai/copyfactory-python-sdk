@@ -152,6 +152,43 @@ class TradingClient(MetaApiClient):
         convert_iso_time_to_date(result)
         return result
 
+    async def get_strategy_log(self, strategy_id: str, start_time: datetime = None, end_time: datetime = None,
+                               offset: int = 0, limit: int = 1000) -> 'List[CopyFactoryUserLogMessage]':
+        """Returns event log for CopyFactory strategy, sorted in reverse chronological order. See
+        https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getStrategyLog/
+
+        Args:
+            strategy_id: Strategy id to retrieve log for.
+            start_time: Time to start loading data from.
+            end_time: Time to stop loading data at.
+            offset: Pagination offset. Default is 0.
+            limit: Pagination limit. Default is 1000.
+
+        Returns:
+            A coroutine which resolves with log records found.
+        """
+        if self._is_not_jwt_token():
+            return self._handle_no_access_exception('get_strategy_log')
+        qs = {
+            'offset': offset,
+            'limit': limit
+        }
+        if start_time:
+            qs['startTime'] = format_date(start_time)
+        if end_time:
+            qs['endTime'] = format_date(end_time)
+        opts = {
+            'url': f'/users/current/strategies/{strategy_id}/user-log',
+            'method': 'GET',
+            'headers': {
+                'auth-token': self._token
+            },
+            'params': qs
+        }
+        result = await self._domainClient.request_copyfactory(opts, True)
+        convert_iso_time_to_date(result)
+        return result
+
     def add_stopout_listener(self, listener: StopoutListener, account_id: str = None, strategy_id: str = None,
                              sequence_number: int = None) -> str:
         """Adds a stopout listener and creates a job to make requests.
