@@ -155,6 +155,45 @@ class TestTradingClient:
                    'https://app.metaapi.cloud/token page to invoke this method.'
 
     @pytest.mark.asyncio
+    async def test_retrieve_copy_trading_strategy_log(self):
+        """Should retrieve copy trading strategy log."""
+        expected = [{
+            'time': '2020-08-08T07:57:30.328Z',
+            'level': 'INFO',
+            'message': 'message'
+        }]
+        domain_client.request_copyfactory = AsyncMock(return_value=expected)
+        records = await trading_client.get_strategy_log('ABCD', date('2020-08-01T00:00:00.000Z'),
+                                                        date('2020-08-10T00:00:00.000Z'), 10, 100)
+        assert records == expected
+        domain_client.request_copyfactory.assert_called_with({
+            'url': '/users/current/strategies/ABCD/user-log',
+            'method': 'GET',
+            'params': {
+                'startTime': '2020-08-01T00:00:00.000Z',
+                'endTime': '2020-08-10T00:00:00.000Z',
+                'offset': 10,
+                'limit': 100
+            },
+            'headers': {
+                'auth-token': token
+            },
+        }, True)
+
+    @pytest.mark.asyncio
+    async def test_not_retrieve_copy_trading_strategy_log_with_account_token(self):
+        """Should not retrieve copy trading strategy log from API with account token."""
+        domain_client.token = 'token'
+        trading_client = TradingClient(domain_client)
+        try:
+            await trading_client.get_strategy_log('ABCD')
+            pytest.fail()
+        except Exception as err:
+            assert err.__str__() == 'You can not invoke get_strategy_log method, ' + \
+                   'because you have connected with account access token. Please use API access token from ' + \
+                   'https://app.metaapi.cloud/token page to invoke this method.'
+
+    @pytest.mark.asyncio
     async def test_get_account(self):
         """Should get account."""
         domain_client.get_account_info = AsyncMock(return_value={'id': 'accountId', 'regions': ['vint-hill']})
