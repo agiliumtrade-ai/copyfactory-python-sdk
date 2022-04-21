@@ -270,4 +270,7 @@ See our website for the full list of APIs and features supported `https://metaap
 Some of the APIs you might decide to use together with this module:
 
 1. MetaApi cloud forex trading API `https://metaapi.cloud/docs/client/ <https://metaapi.cloud/docs/client/>`_
-2. MetaStats cloud forex trading statistics API `https://metaapi.cloud/docs/metastats/ <https://metaapi.cloud/docs/metastats/>`_
+2. MetaTrader account management API `https://metaapi.cloud/docs/provisioning/ <https://metaapi.cloud/docs/provisioning/>`_
+3. MetaStats cloud forex trading statistics API `https://metaapi.cloud/docs/metastats/ <https://metaapi.cloud/docs/metastats/>`_
+4. MetaApi MT manager API `https://metaapi.cloud/docs/manager/ <https://metaapi.cloud/docs/manager/>`_
+5. MetaApi risk management API `https://metaapi.cloud/docs/risk-management/ <https://metaapi.cloud/docs/risk-management/>`_

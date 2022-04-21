@@ -1,3 +1,6 @@
+5.2.1
+  - added references to MT manager api and risk management api
+
 5.2.0
   - added get_strategy_log method
 
