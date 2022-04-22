@@ -74,7 +74,7 @@ class DomainClient:
                     raise err
                 else:
                     self._regionIndex += 1
-                    return await self.request_copyfactory(opts)
+                    return await self.request_copyfactory(opts, is_extended_timeout)
 
     async def request(self, opts: dict):
         """Sends an http request.
