@@ -13,7 +13,7 @@ CopyFactoryStrategySymbolMapping = TypedDict(
 """CopyFactory strategy symbol mapping."""
 
 
-class CopyFactoryStrategyIdAndName(TypedDict):
+class CopyFactoryStrategyIdAndName(TypedDict, total=False):
     """CopyFactory strategy id and name."""
     id: str
     """Unique strategy id."""
@@ -21,7 +21,7 @@ class CopyFactoryStrategyIdAndName(TypedDict):
     """Human-readable strategy name."""
 
 
-class CopyFactoryStrategyStopout(TypedDict):
+class CopyFactoryStrategyStopout(TypedDict, total=False):
     """CopyFactory strategy stopout."""
     strategy: CopyFactoryStrategyIdAndName
     """Strategy which was stopped out."""
@@ -40,7 +40,7 @@ class CopyFactoryStrategyStopout(TypedDict):
     """Time the strategy is stopped till."""
 
 
-class CopyFactoryStrategyEquityCurveFilter(TypedDict):
+class CopyFactoryStrategyEquityCurveFilter(TypedDict, total=False):
     """CopyFactory strategy equity curve filter."""
     period: float
     """Moving average period, must be greater or equal to 1."""
@@ -49,7 +49,7 @@ class CopyFactoryStrategyEquityCurveFilter(TypedDict):
     Allowed units are s, m, h, d and w."""
 
 
-class CopyFactoryStrategyDrawdownFilter(TypedDict):
+class CopyFactoryStrategyDrawdownFilter(TypedDict, total=False):
     """CopyFactory strategy drawdown filter."""
     maxDrawdown: float
     """Maximum drawdown value after which action is executed. Drawdown should be configured as a fraction
@@ -60,13 +60,13 @@ class CopyFactoryStrategyDrawdownFilter(TypedDict):
     transmitted only if dd is less than maxDrawdown value."""
 
 
-class StrategyId(TypedDict):
+class StrategyId(TypedDict, total=False):
     """Strategy id"""
     id: str
     """Strategy id"""
 
 
-class CopyFactoryStrategySymbolFilter(TypedDict):
+class CopyFactoryStrategySymbolFilter(TypedDict, total=False):
     """CopyFactory symbol filter."""
     included: List[str]
     """List of symbols copied. Leave the value empty to copy all symbols."""
@@ -74,7 +74,7 @@ class CopyFactoryStrategySymbolFilter(TypedDict):
     """List of symbols excluded from copying. Leave the value empty to copy all symbols."""
 
 
-class CopyFactoryStrategyBreakingNewsFilter(TypedDict):
+class CopyFactoryStrategyBreakingNewsFilter(TypedDict, total=False):
     """CopyFactory breaking news risk filter."""
     priorities: List[str]
     """List of breaking news priorities to stop trading on, leave empty to disable breaking news filter. One of high,
@@ -87,7 +87,7 @@ class CopyFactoryStrategyBreakingNewsFilter(TypedDict):
     60 minutes."""
 
 
-class CopyFactoryStrategyCalendarNewsFilter(TypedDict):
+class CopyFactoryStrategyCalendarNewsFilter(TypedDict, total=False):
     """CopyFactory calendar news filter."""
     priorities: List[str]
     """List of calendar news priorities to stop trading on, leave empty to disable calendar news filter. One of
@@ -103,7 +103,7 @@ class CopyFactoryStrategyCalendarNewsFilter(TypedDict):
     minutes"""
 
 
-class CopyFactoryStrategyNewsFilter(TypedDict):
+class CopyFactoryStrategyNewsFilter(TypedDict, total=False):
     """CopyFactory news risk filter."""
     breakingNewsFilter: Optional[CopyFactoryStrategyBreakingNewsFilter]
     """Breaking news filter."""
@@ -111,7 +111,7 @@ class CopyFactoryStrategyNewsFilter(TypedDict):
     """Calendar news filter."""
 
 
-class CopyFactoryStrategyMaxStopLoss(TypedDict):
+class CopyFactoryStrategyMaxStopLoss(TypedDict, total=False):
     """CopyFactory strategy max stop loss settings."""
     value: float
     """Maximum SL value."""
@@ -119,7 +119,7 @@ class CopyFactoryStrategyMaxStopLoss(TypedDict):
     """SL units. Only pips value is supported at this point."""
 
 
-class CopyFactoryStrategyRiskLimit(TypedDict):
+class CopyFactoryStrategyRiskLimit(TypedDict, total=False):
     """CopyFactory risk limit filter."""
     type: str
     """Restriction type. One of daily, monthly, or yearly."""
@@ -137,7 +137,7 @@ class CopyFactoryStrategyRiskLimit(TypedDict):
     the filter after stopout event."""
 
 
-class CopyFactoryStrategyTradeSizeScaling(TypedDict):
+class CopyFactoryStrategyTradeSizeScaling(TypedDict, total=False):
     """CopyFactory strategy trade size scaling settings."""
     mode: str
     """If set to balance, the trade size on strategy subscriber will be scaled according to
@@ -153,7 +153,7 @@ class CopyFactoryStrategyTradeSizeScaling(TypedDict):
     """Fixed risk fraction for use with fixedRisk trade size scaling mode."""
 
 
-class CopyFactoryStrategySubscription(TypedDict):
+class CopyFactoryStrategySubscription(TypedDict, total=False):
     """CopyFactory strategy subscriptions."""
     strategyId: str
     """Id of the strategy to subscribe to."""
@@ -209,7 +209,7 @@ class CopyFactoryStrategySubscription(TypedDict):
     closed."""
 
 
-class CopyFactorySubscriberUpdate(TypedDict):
+class CopyFactorySubscriberUpdate(TypedDict, total=False):
     """CopyFactory subscriber update."""
     name: str
     """Account human-readable name."""
@@ -255,7 +255,7 @@ class CopyFactorySubscriber(CopyFactorySubscriberUpdate):
     """Id of the MetaApi account to copy trades to."""
 
 
-class CopyFactoryStrategyCommissionScheme(TypedDict):
+class CopyFactoryStrategyCommissionScheme(TypedDict, total=False):
     """CopyFactory strategy commission scheme."""
     type: str
     """Commission type. One of flat-fee, lots-traded, lots-won, amount-traded, amount-won, high-water-mark."""
@@ -267,7 +267,7 @@ class CopyFactoryStrategyCommissionScheme(TypedDict):
     amount-won, high-water-mark."""
 
 
-class CopyFactoryStrategyMagicFilter(TypedDict):
+class CopyFactoryStrategyMagicFilter(TypedDict, total=False):
     """CopyFactory strategy magic filter."""
     included: List[str]
     """List of magics (expert ids) or magic ranges copied. Leave the value empty to copy all magics."""
@@ -275,7 +275,7 @@ class CopyFactoryStrategyMagicFilter(TypedDict):
     """List of magics (expert ids) or magic ranges excluded from copying. Leave the value empty to copy all magics."""
 
 
-class CopyFactoryStrategyTimeSettings(TypedDict):
+class CopyFactoryStrategyTimeSettings(TypedDict, total=False):
     """CopyFactory strategy time settings."""
     lifetimeInHours: Optional[float]
     """Position lifetime. Default is to keep positions open up to 90 days."""
@@ -284,7 +284,25 @@ class CopyFactoryStrategyTimeSettings(TypedDict):
     position were not copied during this time, the copying will not be retried anymore."""
 
 
-class CopyFactoryStrategyUpdate(TypedDict):
+class StrategyTelegramPublishingSettings(TypedDict, total=False):
+    """Telegram publishing settings."""
+    token: str
+    """Telegram bot API token."""
+    chatId: str
+    """Telegram chatId to publish signals to. It can reference either a public channel (e.g. @myChannel),
+    private channel (works by chat id only) or a user (works by chatId only). Note that in order to publish signals
+    to a channel bot must be an admin of the channel."""
+    template: str
+    """Telegram message template. A substring of ${description} will be replaced with a signal description."""
+
+
+class StrategyTelegramSettings(TypedDict, total=False):
+    """Strategy Telegram integration settings."""
+    publishing: StrategyTelegramPublishingSettings
+    """Telegram publishing settings."""
+
+
+class CopyFactoryStrategyUpdate(TypedDict, total=False):
     """CopyFactory strategy update."""
     name: str
     """Strategy human-readable name."""
@@ -344,12 +362,14 @@ class CopyFactoryStrategyUpdate(TypedDict):
     """Symbols traded by this strategy. Specifying the symbols will improve trade latency on first trades made by
     strategy. If you do not specify this setting the application will monitor the strategy trades and detect the
     symbols automatically over time."""
+    telegram: Optional[StrategyTelegramSettings]
+    """Telegram publishing settings."""
     timeSettings: Optional[CopyFactoryStrategyTimeSettings]
     """Settings to manage copying timeframe and position lifetime. Default is to copy position within 1 minute from
     being opened at source and let the position to live for up to 90 days."""
 
 
-class CopyFactoryStrategy(CopyFactoryStrategyUpdate):
+class CopyFactoryStrategy(CopyFactoryStrategyUpdate, total=False):
     """CopyFactory provider strategy"""
     _id: str
     """Unique strategy id."""
@@ -366,7 +386,7 @@ class CopyFactoryStrategy(CopyFactoryStrategyUpdate):
     close-gracefully-by-position, close-gracefully-by-symbol, close-immediately."""
 
 
-class CopyFactorySubscriberOrProviderUser(TypedDict):
+class CopyFactorySubscriberOrProviderUser(TypedDict, total=False):
     """CopyFactory provider or subscriber user"""
     id: str
     """Profile id."""
@@ -376,7 +396,7 @@ class CopyFactorySubscriberOrProviderUser(TypedDict):
     """Array of strategy IDs provided by provider or subscribed to by subscriber."""
 
 
-class CopyFactoryTransactionMetrics(TypedDict):
+class CopyFactoryTransactionMetrics(TypedDict, total=False):
     """Trade copying metrics such as slippage and latencies."""
     tradeCopyingLatency: Optional[float]
     """Trade copying latency, measured in milliseconds based on transaction time provided by broker."""
@@ -392,7 +412,7 @@ class CopyFactoryTransactionMetrics(TypedDict):
     """Trade latency for a copied trade introduced by broker and MT platform, measured in milliseconds"""
 
 
-class CopyFactoryTransaction(TypedDict):
+class CopyFactoryTransaction(TypedDict, total=False):
     """CopyFactory transaction."""
     id: str
     """Transaction id."""
@@ -448,7 +468,7 @@ class CopyFactoryTransaction(TypedDict):
     """Trade copying metrics such as slippage and latencies. Measured selectively for copied trades"""
 
 
-class CopyFactoryPortfolioStrategyMember(TypedDict):
+class CopyFactoryPortfolioStrategyMember(TypedDict, total=False):
     """Portfolio strategy member."""
     strategyId: str
     """Member strategy id."""
@@ -504,7 +524,7 @@ class CopyFactoryPortfolioStrategyMember(TypedDict):
     close-gracefully-by-position, close-gracefully-by-symbol, close-immediately."""
 
 
-class CopyFactoryPortfolioStrategyUpdate(TypedDict):
+class CopyFactoryPortfolioStrategyUpdate(TypedDict, total=False):
     """Portfolio strategy update."""
     name: str
     """Strategy human-readable name."""
@@ -557,7 +577,7 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict):
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
 
 
-class CopyFactoryPortfolioStrategy(CopyFactoryPortfolioStrategyUpdate):
+class CopyFactoryPortfolioStrategy(CopyFactoryPortfolioStrategyUpdate, total=False):
     """Portfolio strategy, i.e. the strategy which includes a set of other strategies."""
     _id: str
     """Unique strategy id."""
@@ -581,7 +601,7 @@ class LogLevel(Enum):
     ERROR = 'ERROR'
 
 
-class CopyFactoryUserLogMessage(TypedDict):
+class CopyFactoryUserLogMessage(TypedDict, total=False):
     """Trade copying user log record."""
     time: datetime
     """Log record time."""
@@ -605,7 +625,7 @@ class CopyFactoryUserLogMessage(TypedDict):
     """Log message."""
 
 
-class CopyFactoryExternalSignalUpdate(TypedDict):
+class CopyFactoryExternalSignalUpdate(TypedDict, total=False):
     """CopyFactory external signal update payload."""
     symbol: str
     """Trade symbol."""
@@ -628,13 +648,13 @@ class CopyFactoryExternalSignalUpdate(TypedDict):
     """Pending order open price."""
 
 
-class CopyFactoryExternalSignalRemove(TypedDict):
+class CopyFactoryExternalSignalRemove(TypedDict, total=False):
     """CopyFactory external signal remove payload."""
     time: datetime
     """The time signal was removed (closed) at."""
 
 
-class CopyFactoryTradingSignal(TypedDict):
+class CopyFactoryTradingSignal(TypedDict, total=False):
     """CopyFactory trading signal."""
     strategy: CopyFactoryStrategyIdAndName
     """Strategy the signal arrived from."""
@@ -666,7 +686,7 @@ class CopyFactoryTradingSignal(TypedDict):
     """Flag indicating that only closing side of this signal will be copied."""
 
 
-class CopyFactoryCloseInstructions(TypedDict):
+class CopyFactoryCloseInstructions(TypedDict, total=False):
     """CopyFactory close instructions"""
     mode: Optional[str]
     """Position close mode on strategy or subscription removal. Preserve means that positions will not be closed and

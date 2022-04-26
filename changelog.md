@@ -1,3 +1,6 @@
+5.3.0
+  - added telegram integration
+
 5.2.1
   - added references to MT manager api and risk management api
 
