@@ -71,7 +71,7 @@ async def external_signal():
         await asyncio.sleep(10)
 
         # output trading signals
-        print(await signal_client.get_trading_signals(slave_metaapi_account.id))
+        print(await signal_client.get_trading_signals())
 
         # remove external signal
         await signal_client.remove_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
