@@ -1,3 +1,6 @@
+5.4.0
+  - expanded strategy trade size scaling options
+
 5.3.0
   - added telegram integration
 
