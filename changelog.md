@@ -1,3 +1,6 @@
+5.5.0
+  - refactored risk limits (please make sure to update your apps to use new enumerations)
+
 5.4.0
   - expanded strategy trade size scaling options
 

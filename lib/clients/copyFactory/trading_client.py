@@ -2,7 +2,7 @@ from ..metaApi_client import MetaApiClient
 from ..domain_client import DomainClient
 from .stopout_listener_manager import StopoutListenerManager
 from .signal_client import SignalClient
-from .copyFactory_models import CopyFactoryStrategyStopout, CopyFactoryUserLogMessage
+from .copyFactory_models import CopyFactoryStrategyStopout, CopyFactoryUserLogMessage, CopyFactoryStrategyStopoutReason
 from .stopout_listener import StopoutListener
 from typing import List
 from httpx import Response
@@ -90,15 +90,15 @@ class TradingClient(MetaApiClient):
         convert_iso_time_to_date(result)
         return result
 
-    async def reset_stopouts(self, subscriber_id: str, strategy_id: str, reason: str) -> Response:
+    async def reset_stopouts(self, subscriber_id: str, strategy_id: str, reason: CopyFactoryStrategyStopoutReason) \
+            -> Response:
         """Resets strategy stopouts. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/trading/resetStopOuts/
 
         Args:
             subscriber_id: Account id.
             strategy_id: Strategy id.
-            reason: Stopout reason to reset. One of yearly-balance, monthly-balance, daily-balance, yearly-equity,
-            monthly-equity, daily-equity, max-drawdown.
+            reason: Stopout reason to reset.
 
         Returns:
             A coroutine which resolves when the stopouts are reset.
