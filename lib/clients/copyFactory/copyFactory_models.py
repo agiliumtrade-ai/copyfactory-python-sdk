@@ -1,4 +1,4 @@
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, Literal
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -21,15 +21,29 @@ class CopyFactoryStrategyIdAndName(TypedDict, total=False):
     """Human-readable strategy name."""
 
 
+CopyFactoryStrategyStopoutReason = Literal[
+    'day-balance-difference', 'date-balance-difference', 'week-balance-difference', 'week-to-date-balance-difference',
+    'month-balance-difference', 'month-to-date-balance-difference', 'quarter-balance-difference',
+    'quarter-to-date-balance-difference', 'year-balance-difference', 'year-to-date-balance-difference',
+    'lifetime-balance-difference', 'day-balance-minus-equity', 'date-balance-minus-equity',
+    'week-balance-minus-equity', 'week-to-date-balance-minus-equity', 'month-balance-minus-equity',
+    'month-to-date-balance-minus-equity', 'quarter-balance-minus-equity', 'quarter-to-date-balance-minus-equity',
+    'year-balance-minus-equity', 'year-to-date-balance-minus-equity', 'lifetime-balance-minus-equity',
+    'day-equity-difference', 'date-equity-difference', 'week-equity-difference', 'week-to-date-equity-difference',
+    'month-equity-difference', 'month-to-date-equity-difference', 'quarter-equity-difference',
+    'quarter-to-date-equity-difference', 'year-equity-difference', 'year-to-date-equity-difference',
+    'lifetime-equity-difference']
+"""CopyFactory strategy stopout reason."""
+
+
 class CopyFactoryStrategyStopout(TypedDict, total=False):
     """CopyFactory strategy stopout."""
     strategy: CopyFactoryStrategyIdAndName
     """Strategy which was stopped out."""
     partial: bool
     """Flag indicating that stopout is partial."""
-    reason: str
-    """Stopout reason. One of yearly-balance, monthly-balance, daily-balance, yearly-equity, monthly-equity,
-    daily-equity, max-drawdown"""
+    reason: CopyFactoryStrategyStopoutReason
+    """Stopout reason."""
     reasonDescription: str
     """Human-readable description of the stopout reason."""
     closePositions: Optional[bool]
@@ -119,12 +133,21 @@ class CopyFactoryStrategyMaxStopLoss(TypedDict, total=False):
     """SL units. Only pips value is supported at this point."""
 
 
+CopyFactoryStrategyRiskLimitType = Literal['day', 'date', 'week', 'week-to-date', 'month', 'month-to-date',
+                                           'quarter', 'quarter-to-date', 'year', 'year-to-date', 'lifetime']
+"""CopyFactory strategy risk limit type."""
+
+
+CopyFactoryStrategyRiskLimitApplyTo = Literal['balance-difference', 'balance-minus-equity', 'equity-difference']
+"""CopyFactory strategy risk limit apply to enum."""
+
+
 class CopyFactoryStrategyRiskLimit(TypedDict, total=False):
     """CopyFactory risk limit filter."""
-    type: str
-    """Restriction type. One of daily, monthly, or yearly."""
-    applyTo: str
-    """Account metric to apply limit to. One of balance, equity."""
+    type: CopyFactoryStrategyRiskLimitType
+    """Restriction type."""
+    applyTo: CopyFactoryStrategyRiskLimitApplyTo
+    """Account metric to apply limit to."""
     maxAbsoluteRisk: Optional[float]
     """Max drawdown allowed, measured in account currency."""
     maxRelativeRisk: Optional[float]
