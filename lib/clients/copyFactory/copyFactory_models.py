@@ -326,7 +326,9 @@ class StrategyTelegramPublishingSettings(TypedDict, total=False):
     private channel (works by chat id only) or a user (works by chatId only). Note that in order to publish signals
     to a channel bot must be an admin of the channel."""
     template: str
-    """Telegram message template. A substring of ${description} will be replaced with a signal description."""
+    """Telegram message template. A substring of ${description} will be replaced with a signal description. Other
+    variables you can use: ${operation}, ${orderId}, ${side}, ${type}, ${volume}, ${symbol}, ${openPrice},
+    ${stopLoss}, ${takeProfit}."""
 
 
 class StrategyTelegramSettings(TypedDict, total=False):

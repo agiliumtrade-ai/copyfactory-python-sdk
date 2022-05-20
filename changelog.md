@@ -1,3 +1,6 @@
+5.5.1
+  - updated telegram integration documentation
+
 5.5.0
   - refactored risk limits (please make sure to update your apps to use new enumerations)
 
