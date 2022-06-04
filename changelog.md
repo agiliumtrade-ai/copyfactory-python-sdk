@@ -1,3 +1,6 @@
+5.5.2
+  - fixed dependency vulnerabilities
+
 5.5.1
   - updated telegram integration documentation
 
