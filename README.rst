@@ -14,6 +14,8 @@ for hosting your own infrastructure. This is possible because over time we manag
 our MetaTrader infrastructure. And with MetaApi you can save significantly on application development and
 maintenance costs and time thanks to high-quality API, open-source SDKs and convenience of a cloud service.
 
+This SDK requires a 3.8+ version of Python to run.
+
 Why do we offer CopyFactory API trade copying API
 =================================================
 
