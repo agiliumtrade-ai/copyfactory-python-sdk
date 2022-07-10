@@ -1,5 +1,6 @@
 5.6.0
   - make it possible to expire pending order signals
+  - fixed dependency vulnerabilities
 
 5.5.1
   - updated telegram integration documentation
