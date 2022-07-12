@@ -5,6 +5,7 @@ from .clients.copyFactory.history_client import HistoryClient
 from .clients.copyFactory.trading_client import TradingClient
 from typing_extensions import TypedDict
 from typing import Optional
+from .logger import LoggerManager
 
 
 class RetryOpts(TypedDict):
@@ -48,6 +49,12 @@ class CopyFactory:
         self._configurationClient = ConfigurationClient(self._domainClient)
         self._historyClient = HistoryClient(self._domainClient)
         self._tradingClient = TradingClient(self._domainClient)
+
+    @staticmethod
+    def enable_logging():
+        """Enables using Logging logger with extended log levels for debugging instead of
+        print function. Note that Logging configuration is performed by the user."""
+        LoggerManager.use_logging()
 
     @property
     def configuration_api(self) -> ConfigurationClient:

@@ -1,7 +1,7 @@
-from ..metaApi_client import MetaApiClient
-from ..domain_client import DomainClient
-from ...models import random_id
-from .stopout_listener import StopoutListener
+from ...metaApi_client import MetaApiClient
+from ...domain_client import DomainClient
+from ....models import random_id
+from .stopoutListener import StopoutListener
 import asyncio
 
 
@@ -63,7 +63,7 @@ class StopoutListenerManager(MetaApiClient):
             opts = {
                 'url': '/users/current/stopouts/stream',
                 'method': 'GET',
-                'qs': {
+                'params': {
                     'previousSequenceNumber': sequence_number,
                     'subscriberId': account_id,
                     'strategyId': strategy_id,

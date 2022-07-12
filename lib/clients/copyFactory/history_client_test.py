@@ -155,3 +155,42 @@ class TestHistoryClient:
             assert err.__str__() == 'You can not invoke get_subscription_transactions method, ' + \
                    'because you have connected with account access token. Please use API access token from ' + \
                    'https://app.metaapi.cloud/token page to invoke this method.'
+
+
+class TestTransactionListener:
+
+    @pytest.mark.asyncio
+    async def test_add_strategy_transaction_listener(self):
+        """Should add strategy listener."""
+        call_stub = MagicMock(return_value='listenerId')
+        history_client._transactionListenerManager.add_strategy_transaction_listener = call_stub
+        listener = MagicMock()
+        listener_id = history_client.add_strategy_transaction_listener(listener, 'ABCD')
+        assert listener_id == 'listenerId'
+        call_stub.assert_called_with(listener, 'ABCD', None)
+
+    @pytest.mark.asyncio
+    async def test_remove_strategy_transaction_listener(self):
+        """Should remove strategy listener."""
+        call_stub = MagicMock()
+        history_client._transactionListenerManager.remove_strategy_transaction_listener = call_stub
+        history_client.remove_strategy_transaction_listener('id')
+        call_stub.assert_called_with('id')
+
+    @pytest.mark.asyncio
+    async def test_add_subscriber_transaction_listener(self):
+        """Should add subscriber listener."""
+        call_stub = MagicMock(return_value='listenerId')
+        history_client._transactionListenerManager.add_subscriber_transaction_listener = call_stub
+        listener = MagicMock()
+        listener_id = history_client.add_subscriber_transaction_listener(listener, 'accountId')
+        assert listener_id == 'listenerId'
+        call_stub.assert_called_with(listener, 'accountId', None)
+
+    @pytest.mark.asyncio
+    async def test_remove_subscriber_transaction_listener(self):
+        """Should remove subscriber listener."""
+        call_stub = MagicMock()
+        history_client._transactionListenerManager.remove_subscriber_transaction_listener = call_stub
+        history_client.remove_subscriber_transaction_listener('id')
+        call_stub.assert_called_with('id')

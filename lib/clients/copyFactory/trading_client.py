@@ -1,9 +1,11 @@
 from ..metaApi_client import MetaApiClient
 from ..domain_client import DomainClient
-from .stopout_listener_manager import StopoutListenerManager
+from .streaming.stopoutListenerManager import StopoutListenerManager
+from .streaming.userLogListenerManager import UserLogListenerManager
 from .signal_client import SignalClient
 from .copyFactory_models import CopyFactoryStrategyStopout, CopyFactoryUserLogMessage, CopyFactoryStrategyStopoutReason
-from .stopout_listener import StopoutListener
+from .streaming.stopoutListener import StopoutListener
+from .streaming.userLogListener import UserLogListener
 from typing import List
 from httpx import Response
 from datetime import datetime
@@ -23,6 +25,7 @@ class TradingClient(MetaApiClient):
         super().__init__(domain_client)
         self._domainClient = domain_client
         self._stopoutListenerManager = StopoutListenerManager(domain_client)
+        self._userLogListenerManager = UserLogListenerManager(domain_client)
 
     async def resynchronize(self, subscriber_id: str, strategy_ids: List[str] = None,
                             position_ids: List[str] = None) -> Response:
@@ -211,3 +214,47 @@ class TradingClient(MetaApiClient):
             listener_id: Stopout listener id.
         """
         self._stopoutListenerManager.remove_stopout_listener(listener_id)
+
+    def add_strategy_log_listener(self, listener: UserLogListener, strategy_id: str,
+                                  start_time: datetime = None) -> str:
+        """Adds a strategy log listener and creates a job to make requests.
+
+        Args:
+            listener: User log listener.
+            strategy_id: Strategy id.
+            start_time: Log search start time.
+
+        Returns:
+            Listener id.
+        """
+        return self._userLogListenerManager.add_strategy_log_listener(listener, strategy_id, start_time)
+
+    def remove_strategy_log_listener(self, listener_id: str):
+        """Removes strategy log listener and cancels the event stream.
+
+        Args:
+            listener_id: Strategy log listener id.
+        """
+        self._userLogListenerManager.remove_strategy_log_listener(listener_id)
+
+    def add_subscriber_log_listener(self, listener: UserLogListener, subscriber_id: str,
+                                    start_time: datetime = None) -> str:
+        """Adds a subscriber log listener and creates a job to make requests.
+
+        Args:
+            listener: User log listener.
+            subscriber_id: Subscriber id.
+            start_time: Log search start time.
+
+        Returns:
+            Listener id.
+        """
+        return self._userLogListenerManager.add_subscriber_log_listener(listener, subscriber_id, start_time)
+
+    def remove_subscriber_log_listener(self, listener_id: str):
+        """Removes subscriber log listener and cancels the event stream.
+
+        Args:
+            listener_id: Subscriber log listener id.
+        """
+        self._userLogListenerManager.remove_subscriber_log_listener(listener_id)

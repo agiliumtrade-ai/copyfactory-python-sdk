@@ -250,6 +250,30 @@ A subscription to a strategy can be stopped if the strategy have exceeded allowe
     # reset a stopout so that subscription can continue
     await trading_api.reset_stopouts(account_id=account_id, strategy_id=strategy_id, reason='daily-equity')
 
+Managing stopout listeners
+==========================
+You can subscribe to a stream of stopout events using the stopout listener.
+
+.. code-block:: python
+
+    from metaapi_cloud_sdk import StopoutListener
+
+    trading_api = copy_factory.trading_api
+
+    # create a custom class based on the StopoutListener
+    class Listener(StopoutListener):
+
+        # specify the function called on event arrival
+        async def on_stopout(strategy_stopout_event):
+            print('Strategy stopout event', strategy_stopout_event)
+
+    # add listener
+    listener = Listener()
+    listener_id = trading_api.add_stopout_listener(listener)
+
+    # remove listener
+    trading_api.remove_stopout_listener(listener_id)
+
 Retrieving slave trading logs
 =============================
 
@@ -263,6 +287,106 @@ Retrieving slave trading logs
 
     # retrieve paginated slave trading log by time range
     print(await trading_api.get_user_log(account_id, datetime.fromtimestamp(datetime.now().timestamp() - 24 * 60 * 60), None, 20, 10))
+
+Log streaming
+=============
+You can subscribe to a stream of strategy or subscriber log events using the user log listener.
+
+Strategy logs
+-------------
+
+.. code-block:: python
+
+    from metaapi_cloud_sdk import UserLogListener
+
+    trading_api = copy_factory.trading_api
+
+    # create a custom class based on the UserLogListener
+    class Listener(UserLogListener):
+
+        # specify the function called on event arrival
+        async def on_user_log(log_event):
+            print('Strategy user log event', log_event)
+
+    # add listener
+    listener = Listener()
+    listener_id = trading_api.add_strategy_log_listener(listener, 'ABCD')
+
+    # remove listener
+    trading_api.remove_strategy_log_listener(listener_id)
+
+Subscriber logs
+-------------
+
+.. code-block:: python
+
+    from metaapi_cloud_sdk import UserLogListener
+
+    trading_api = copy_factory.trading_api
+
+    # create a custom class based on the UserLogListener
+    class Listener(UserLogListener):
+
+        # specify the function called on event arrival
+        async def on_user_log(log_event):
+            print('Subscriber user log event', log_event)
+
+    # add listener
+    listener = Listener()
+    listener_id = trading_api.add_subscriber_log_listener(listener, 'accountId')
+
+    # remove listener
+    trading_api.remove_subscriber_log_listener(listener_id)
+
+Transaction streaming
+=====================
+You can subscribe to a stream of strategy or subscriber transaction events using the transaction listener.
+
+Strategy transactions
+---------------------
+
+.. code-block:: python
+
+    from metaapi_cloud_sdk import TransactionListener
+
+    history_api = copy_factory.history_api
+
+    # create a custom class based on the TransactionListener
+    class Listener(TransactionListener):
+
+        # specify the function called on event arrival
+        async def on_transaction(transaction_event):
+            print('Strategy transaction event', transaction_event)
+
+    # add listener
+    listener = Listener()
+    listener_id = history_api.add_strategy_transaction_listener(listener, 'ABCD')
+
+    # remove listener
+    history_api.remove_strategy_transaction_listener(listener_id)
+
+Subscriber transactions
+-----------------------
+
+.. code-block:: python
+
+    from metaapi_cloud_sdk import TransactionListener
+
+    history_api = copy_factory.history_api
+
+    # create a custom class based on the TransactionListener
+    class Listener(TransactionListener):
+
+        # specify the function called on event arrival
+        async def on_transaction(transaction_event):
+            print('Subscriber transaction event', transaction_event)
+
+    # add listener
+    listener = Listener()
+    listener_id = history_api.add_strategy_transaction_listener(listener, 'ABCD')
+
+    # remove listener
+    history_api.remove_subscriber_transaction_listener(listener_id)
 
 Related projects:
 =================
