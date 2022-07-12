@@ -163,13 +163,17 @@ class CopyFactoryStrategyRiskLimit(TypedDict, total=False):
 class CopyFactoryStrategyTradeSizeScaling(TypedDict, total=False):
     """CopyFactory strategy trade size scaling settings."""
     mode: str
-    """If set to balance, the trade size on strategy subscriber will be scaled according to
-    balance to preserve risk. If value is none, then trade size will be preserved irregardless of the subscriber
-    balance. If value is contractSize, then trade size will be scaled according to contract size. If fixedVolume is
-    set, then trade will be copied with a fixed volume of traceVolume setting. If fixedRisk is set, then each trade
-    will be copied with a trade volume set to risk specific fraction of balance as configured by riskFraction setting.
-    Note, that in fixedRisk mode trades without a SL are not copied. Default is balance. Allowed values: none,
-    contractSize, balance, fixedVolume, fixedRisk."""
+    """If set to balance, the trade size on strategy subscriber will be scaled according
+    to balance to preserve risk. If set to equity, the trade size on strategy subscriber will be scaled according
+    to subscriber equity. If value is none, then trade size will be preserved irregardless of the subscriber
+    balance. If value is contractSize, then trade size will be scaled according to contract size. If fixedVolume
+    is set, then trade will be copied with a fixed volume of tradeVolume setting. If fixedRisk is set, then each
+    trade will be copied with a trade volume set to risk specific fraction of balance as configured by
+    riskFraction setting. Note, that in fixedRisk mode trades without a SL are not copied. If expression is
+    set, then trade volume will be calculated using a user-defined expression. Note, that expression trade
+    size scaling mode is intended for advanced users and we DO NOT RECOMMEND using it unless you understand
+    what are you doing, as mistakes in expression can result in loss.
+    Allowed values: none, contractSize, balance, equity, fixedVolume, fixedRisk, expression."""
     tradeVolume: Optional[float]
     """Fixed trade volume for use with fixedVolume trade size scaling mode."""
     riskFraction: Optional[float]
@@ -177,13 +181,33 @@ class CopyFactoryStrategyTradeSizeScaling(TypedDict, total=False):
     forceTinyTrades: Optional[bool]
     """If set to true, that trades smaller than minVolume - 0.5 * volumeStep will be placed with minVolume volume, in
     spite that they will result in increased trade risk, as long as risk increase is in line with maxRiskCoefficient
-    configuration. Othersite such trades will be skipped to avoid taking excessive trade risk. Default is false."""
+    configuration. Otherwise such trades will be skipped to avoid taking excessive trade risk. Default is false."""
     maxRiskCoefficient: Optional[float]
     """Sometimes when placing a small trade, the risk taken can exceed the subscription expectation due to volume
     rounding or forcefully placing tiny trades in accordance with forceTinyTrades setting. The maxRiskCoefficient
     setting will act as an extra line of protection to restrict trades if actual risk exceeds the value of expected
     subscription risk multiplied by maxRiskCoefficient. As a result trade volume will be decreased correspondingly or
     trade will be skipped if resulting volume is less than minVolume. Default value is 5, minimum value is 1."""
+    expression: Optional[str]
+    """math.js expression which will be used to calculate trade volume
+    (see https://mathjs.org/docs/expressions/syntax.html). Following variables are available in expression
+    scope: providerVolume - provider signal trade size; providerTradeAmount - provider signal trade value in
+    trade copier base curency; multiplier - subscription multiplier value; providerBalance - provider balance
+    value in trade copier base currency; balance - subscriber balance value in trade copier base currency;
+    quoteOrOpenPrice - current asset price (for market orders) or open price (for pending orders) on subscriber
+    side; tickValue - current asset tick value on subscriber side expressed in trade copier base currency;
+    tickSize - tick size on subscriber side; providerScaledVolume - provider trade volume multiplied by provider
+    contract size; contractSize - subscriber contract size; providerStopLoss - provider signal stop loss price;
+    providerTakeProfit - provider signal take profit price; accountCurrencyExchangeRate - subscriber exchange
+    rate of account currency to trade copier base currency."""
+
+
+class StrategySignalDelay(TypedDict, total=False):
+    """Strategy signal delay."""
+    minInSeconds: float
+    """Min extra trading signal delay value expressed in seconds."""
+    maxInSeconds: float
+    """Max extra trading signal delay value expressed in seconds."""
 
 
 class CopyFactoryStrategySubscription(TypedDict, total=False):
@@ -237,6 +261,9 @@ class CopyFactoryStrategySubscription(TypedDict, total=False):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    signalDelay: Optional[StrategySignalDelay]
+    """Extra trade copying delay introduced by trade copier before applying the trade signal. You can configure
+    either a fixed or a random delay."""
     removed: Optional[bool]
     """Flag indicating that the subscription was scheduled for removal once all subscription positions will be
     closed."""
@@ -278,6 +305,9 @@ class CopyFactorySubscriberUpdate(TypedDict, total=False):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    signalDelay: Optional[StrategySignalDelay]
+    """Extra trade copying delay introduced by trade copier before applying the trade signal. You can configure
+    either a fixed or a random delay."""
     subscriptions: List[CopyFactoryStrategySubscription]
     """Strategy subscriptions."""
 
@@ -315,9 +345,9 @@ class CopyFactoryStrategyTimeSettings(TypedDict, total=False):
     openingIntervalInMinutes: Optional[float]
     """Time interval to copy new positions. Default is to let 1 minute for the position to get copied. If
     position were not copied during this time, the copying will not be retried anymore."""
+    expirePendingOrders: Optional[bool]
     """If set to true, the openingIntervalInMinutes setting will be applied to pending orders as well. By default
     pending order signals do not expire."""
-    expirePendingOrders: Optional[bool]
 
 
 class StrategyTelegramPublishingSettings(TypedDict, total=False):
@@ -390,6 +420,9 @@ class CopyFactoryStrategyUpdate(TypedDict, total=False):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    signalDelay: Optional[StrategySignalDelay]
+    """Extra trade copying delay introduced by trade copier before applying the trade signal. You can configure
+    either a fixed or a random delay."""
     magicFilter: Optional[CopyFactoryStrategyMagicFilter]
     """Magic (expert id) filter."""
     equityCurveFilter: Optional[CopyFactoryStrategyEquityCurveFilter]
@@ -552,6 +585,9 @@ class CopyFactoryPortfolioStrategyMember(TypedDict, total=False):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    signalDelay: Optional[StrategySignalDelay]
+    """Extra trade copying delay introduced by trade copier before applying the trade signal. You can configure
+    either a fixed or a random delay."""
     closeOnRemovalMode: Optional[str]
     """Position close mode on strategy or subscription removal. Preserve means that positions will not be closed and
     will not be managed by CopyFactory. close-gracefully-by-position means that positions will continue to be managed
@@ -613,6 +649,9 @@ class CopyFactoryPortfolioStrategyUpdate(TypedDict, total=False):
     """Minimum trade volume to copy. Trade signals with a smaller volume will not be copied."""
     maxTradeVolume: Optional[float]
     """Maximum trade volume to copy. Trade signals with a larger volume will be copied with maximum volume instead."""
+    signalDelay: Optional[StrategySignalDelay]
+    """Extra trade copying delay introduced by trade copier before applying the trade signal. You can configure
+    either a fixed or a random delay."""
 
 
 class CopyFactoryPortfolioStrategy(CopyFactoryPortfolioStrategyUpdate, total=False):

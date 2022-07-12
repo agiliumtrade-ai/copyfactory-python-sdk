@@ -213,10 +213,11 @@ class TestTradingClient:
     @pytest.mark.asyncio
     async def test_add_stopout_listener(self):
         """Should add stopout listener."""
-        call_stub = MagicMock()
+        call_stub = MagicMock(return_value='listenerId')
         trading_client._stopoutListenerManager.add_stopout_listener = call_stub
         listener = MagicMock()
-        trading_client.add_stopout_listener(listener, 'accountId', 'ABCD', 1)
+        listener_id = trading_client.add_stopout_listener(listener, 'accountId', 'ABCD', 1)
+        assert listener_id == 'listenerId'
         call_stub.assert_called_with(listener, 'accountId', 'ABCD', 1)
 
     @pytest.mark.asyncio
@@ -225,4 +226,43 @@ class TestTradingClient:
         call_stub = MagicMock()
         trading_client._stopoutListenerManager.remove_stopout_listener = call_stub
         trading_client.remove_stopout_listener('id')
+        call_stub.assert_called_with('id')
+
+
+class TestUserLogListener:
+
+    @pytest.mark.asyncio
+    async def test_add_strategy_log_listener(self):
+        """Should add strategy listener."""
+        call_stub = MagicMock(return_value='listenerId')
+        trading_client._userLogListenerManager.add_strategy_log_listener = call_stub
+        listener = MagicMock()
+        listener_id = trading_client.add_strategy_log_listener(listener, 'ABCD')
+        assert listener_id == 'listenerId'
+        call_stub.assert_called_with(listener, 'ABCD', None)
+
+    @pytest.mark.asyncio
+    async def test_remove_strategy_log_listener(self):
+        """Should remove stopout listener."""
+        call_stub = MagicMock()
+        trading_client._stopoutListenerManager.remove_stopout_listener = call_stub
+        trading_client.remove_stopout_listener('id')
+        call_stub.assert_called_with('id')
+
+    @pytest.mark.asyncio
+    async def test_add_subscriber_log_listener(self):
+        """Should add subscriber listener."""
+        call_stub = MagicMock(return_value='listenerId')
+        trading_client._userLogListenerManager.add_subscriber_log_listener = call_stub
+        listener = MagicMock()
+        listener_id = trading_client.add_subscriber_log_listener(listener, 'accountId')
+        assert listener_id == 'listenerId'
+        call_stub.assert_called_with(listener, 'accountId', None)
+
+    @pytest.mark.asyncio
+    async def test_remove_subscriber_log_listener(self):
+        """Should remove subscriber listener."""
+        call_stub = MagicMock()
+        trading_client._userLogListenerManager.remove_subscriber_log_listener = call_stub
+        trading_client.remove_subscriber_log_listener('id')
         call_stub.assert_called_with('id')

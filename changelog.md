@@ -1,5 +1,14 @@
+5.10.0
+  - make it possible to stream user logs and transactions
+  - make it possible to delay trading signals by configured amount of time
+  - updated trade size scaling expression variables
+  - added equity trade size scaling mode
+  - added expression option to strategy trade size scaling
+
 5.6.0
   - make it possible to expire pending order signals
+
+5.5.2
   - fixed dependency vulnerabilities
 
 5.5.1

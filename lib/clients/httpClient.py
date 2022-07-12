@@ -18,6 +18,7 @@ if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.starts
 
 class RequestOptions(TypedDict):
     """Options for HttpClient requests."""
+    timeout: float
     method: Optional[str]
     url: str
     headers: Optional[dict]
@@ -101,7 +102,7 @@ class HttpClient:
         return response
 
     async def _make_request(self, options: RequestOptions) -> Response:
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with httpx.AsyncClient(timeout=options['timeout'] if 'timeout' in options else self._timeout) as client:
             method = options['method'] if ('method' in options) else 'GET'
             url = options['url']
             params = options['params'] if 'params' in options else None

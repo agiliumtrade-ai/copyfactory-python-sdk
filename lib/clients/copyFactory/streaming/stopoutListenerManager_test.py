@@ -1,7 +1,7 @@
-from ...models import date
-from .stopout_listener_manager import StopoutListenerManager
-from .stopout_listener import StopoutListener
-from ..domain_client import DomainClient
+from ....models import date
+from .stopoutListenerManager import StopoutListenerManager
+from .stopoutListener import StopoutListener
+from ...domain_client import DomainClient
 from mock import MagicMock, patch, AsyncMock
 from asyncio import sleep
 import pytest
@@ -80,7 +80,7 @@ async def run_around_tests():
         if arg == {
             'url': '/users/current/stopouts/stream',
             'method': 'GET',
-            'qs': {
+            'params': {
                 'previousSequenceNumber': 1,
                 'subscriberId': 'accountId',
                 'strategyId': 'ABCD',
@@ -95,7 +95,7 @@ async def run_around_tests():
         elif arg == {
             'url': '/users/current/stopouts/stream',
             'method': 'GET',
-            'qs': {
+            'params': {
                 'previousSequenceNumber': 3,
                 'subscriberId': 'accountId',
                 'strategyId': 'ABCD',
@@ -115,11 +115,12 @@ async def run_around_tests():
     domain_client.request_copyfactory = get_stopout_mock
 
 
-class TestTradingClient:
+class TestStopoutListenerManager:
     @pytest.mark.asyncio
     async def test_add_stopout_listener(self):
         """Should add stopout listener."""
-        with patch('lib.clients.copyFactory.stopout_listener_manager.asyncio.sleep', new=lambda x: sleep(x / 10)):
+        with patch('lib.clients.copyFactory.streaming.stopoutListenerManager.asyncio.sleep',
+                   new=lambda x: sleep(x / 10)):
             id = stopout_listener_manager.add_stopout_listener(listener, 'accountId', 'ABCD', 1)
             await sleep(0.22)
             call_stub.assert_any_call(expected)
@@ -129,7 +130,8 @@ class TestTradingClient:
     @pytest.mark.asyncio
     async def test_remove_stopout_listener(self):
         """Should remove stopout listener."""
-        with patch('lib.clients.copyFactory.stopout_listener_manager.asyncio.sleep', new=lambda x: sleep(x / 10)):
+        with patch('lib.clients.copyFactory.streaming.stopoutListenerManager.asyncio.sleep',
+                   new=lambda x: sleep(x / 10)):
             id = stopout_listener_manager.add_stopout_listener(listener, 'accountId', 'ABCD', 1)
             await sleep(0.08)
             stopout_listener_manager.remove_stopout_listener(id)
@@ -151,7 +153,7 @@ class TestTradingClient:
             if arg == {
                 'url': '/users/current/stopouts/stream',
                 'method': 'GET',
-                'qs': {
+                'params': {
                     'previousSequenceNumber': 1,
                     'subscriberId': 'accountId',
                     'strategyId': 'ABCD',
@@ -169,7 +171,8 @@ class TestTradingClient:
 
         get_stopout_mock = AsyncMock(side_effect=get_stopout_func)
         domain_client.request_copyfactory = get_stopout_mock
-        with patch('lib.clients.copyFactory.stopout_listener_manager.asyncio.sleep', new=lambda x: sleep(x / 10)):
+        with patch('lib.clients.copyFactory.streaming.stopoutListenerManager.asyncio.sleep',
+                   new=lambda x: sleep(x / 10)):
             id = stopout_listener_manager.add_stopout_listener(listener, 'accountId', 'ABCD', 1)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
