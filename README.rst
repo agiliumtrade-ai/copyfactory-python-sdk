@@ -316,7 +316,7 @@ Strategy logs
     trading_api.remove_strategy_log_listener(listener_id)
 
 Subscriber logs
--------------
+---------------
 
 .. code-block:: python
 
