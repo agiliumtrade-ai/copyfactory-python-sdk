@@ -211,8 +211,11 @@ You can submit external trading signals to your trading strategy.
     trading_api = copy_factory.trading_api
     signal_id = trading_api.generate_signal_id()
 
+    # get signal client
+    signal_client = await trading_api.get_signal_client(account_id=account_id)
+
     # add trading signal
-    await trading_api.update_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
+    await signal_client.update_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
         'symbol': 'EURUSD',
         'type': 'POSITION_TYPE_BUY',
         'time': datetime.now(),
@@ -220,7 +223,7 @@ You can submit external trading signals to your trading strategy.
     })
 
     # remove signal
-    await trading_api.remove_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
+    await signal_client.remove_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
         'time': datetime.now()
     })
 
@@ -230,9 +233,10 @@ Retrieving trading signals
 .. code-block:: python
 
     subscriber_id = '...' # CopyFactory subscriber id
+    signal_client = await trading_api.get_signal_client(account_id=account_id)
 
     # retrieve trading signals
-    print(await copy_factory.trading_api.get_trading_signals(subscriber_id))
+    print(await signal_client.get_trading_signals(subscriber_id))
 
 Managing stopouts
 =================

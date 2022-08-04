@@ -1,3 +1,6 @@
+5.10.1
+  - fixed signal client readme
+
 5.10.0
   - make it possible to stream user logs and transactions
   - make it possible to delay trading signals by configured amount of time
