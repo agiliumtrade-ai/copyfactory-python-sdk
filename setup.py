@@ -8,12 +8,13 @@ install_requires = [
 ]
 
 tests_require = [
-      'pytest', 'pytest-mock', 'pytest-asyncio', 'asynctest', 'aiohttp', 'mock', 'freezegun==1.0.0', 'respx==0.19.2'
+    'pytest==6.2.5', 'pytest-mock', 'pytest-asyncio==0.16.0', 'asynctest', 'aiohttp', 'mock', 'freezegun==1.0.0',
+    'respx==0.19.2'
 ]
 
 setuptools.setup(
     name="metaapi_cloud_copyfactory_sdk",
-    version="5.10.0",
+    version="5.10.1",
     author="Agilium Labs LLC",
     author_email="agiliumtrade@agiliumtrade.ai",
     description="Python SDK for SDK for CopyFactory trade copying API. Can copy trades both between MetaTrader 5 "
