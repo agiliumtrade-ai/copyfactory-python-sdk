@@ -1,3 +1,9 @@
+5.11.0
+  - added limit param to subscriber & strategy log streaming
+  - fix subscriber & strategy extra log streaming after unsubscription
+  - renamed expirePendingOrders -> expirePendingOrderSignals
+  - made it possible to specify open price for market external signals
+
 5.10.1
   - fixed signal client readme
 

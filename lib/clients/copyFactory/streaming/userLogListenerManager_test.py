@@ -40,6 +40,7 @@ listener = UserLogListener()
 async def run_around_tests():
     global domain_client
     domain_client = DomainClient(MagicMock(), token)
+    domain_client.request_copyfactory = AsyncMock()
     global user_log_listener_manager
     user_log_listener_manager = UserLogListenerManager(domain_client)
     global call_stub
@@ -61,7 +62,7 @@ async def prepare_strategy_logs():
             'method': 'GET',
             'params': {
                 'startTime': '2020-08-08T00:00:00.000Z',
-                'limit': 1000
+                'limit': 10
             },
             'headers': {
                 'auth-token': token
@@ -74,7 +75,7 @@ async def prepare_strategy_logs():
             'method': 'GET',
             'params': {
                 'startTime': '2020-08-08T08:57:30.329Z',
-                'limit': 1000
+                'limit': 10
             },
             'headers': {
                 'auth-token': token
@@ -96,7 +97,7 @@ class TestStrategyLogs:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_strategy_log_listener(listener, 'ABCD',
-                                                                     date('2020-08-08T00:00:00.000Z'))
+                                                                     date('2020-08-08T00:00:00.000Z'), 10)
             await sleep(0.22)
             call_stub.assert_any_call(expected)
             call_stub.assert_any_call(expected2)
@@ -108,8 +109,8 @@ class TestStrategyLogs:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_strategy_log_listener(listener, 'ABCD',
-                                                                     date('2020-08-08T00:00:00.000Z'))
-            await sleep(0.08)
+                                                                     date('2020-08-08T00:00:00.000Z'), 10)
+            await sleep(0.11)
             user_log_listener_manager.remove_strategy_log_listener(id)
             await sleep(0.22)
             call_stub.assert_any_call(expected)
@@ -131,7 +132,7 @@ class TestStrategyLogs:
                 'method': 'GET',
                 'params': {
                     'startTime': '2020-08-08T00:00:00.000Z',
-                    'limit': 1000
+                    'limit': 10
                 },
                 'headers': {
                     'auth-token': token
@@ -147,7 +148,7 @@ class TestStrategyLogs:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_strategy_log_listener(listener, 'ABCD',
-                                                                     date('2020-08-08T00:00:00.000Z'))
+                                                                     date('2020-08-08T00:00:00.000Z'), 10)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
             assert call_stub.call_count == 0
@@ -171,7 +172,7 @@ class TestStrategyLogs:
                 'method': 'GET',
                 'params': {
                     'startTime': '2020-08-08T00:00:00.000Z',
-                    'limit': 1000
+                    'limit': 10
                 },
                 'headers': {
                     'auth-token': token
@@ -184,7 +185,7 @@ class TestStrategyLogs:
                 'method': 'GET',
                 'params': {
                     'startTime': '2020-08-08T08:57:30.329Z',
-                    'limit': 1000
+                    'limit': 10
                 },
                 'headers': {
                     'auth-token': token
@@ -197,7 +198,7 @@ class TestStrategyLogs:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_strategy_log_listener(listener, 'ABCD',
-                                                                     date('2020-08-08T00:00:00.000Z'))
+                                                                     date('2020-08-08T00:00:00.000Z'), 10)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
             assert call_stub.call_count == 0
@@ -220,7 +221,7 @@ async def prepare_subscriber_logs():
             'method': 'GET',
             'params': {
                 'startTime': '2020-08-08T00:00:00.000Z',
-                'limit': 1000
+                'limit': 10
             },
             'headers': {
                 'auth-token': token
@@ -233,7 +234,7 @@ async def prepare_subscriber_logs():
             'method': 'GET',
             'params': {
                 'startTime': '2020-08-08T08:57:30.329Z',
-                'limit': 1000
+                'limit': 10
             },
             'headers': {
                 'auth-token': token
@@ -255,7 +256,7 @@ class TestSubscriberTransactions:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_subscriber_log_listener(listener, 'accountId',
-                                                                       date('2020-08-08T00:00:00.000Z'))
+                                                                       date('2020-08-08T00:00:00.000Z'), 10)
             await sleep(0.22)
             call_stub.assert_any_call(expected)
             call_stub.assert_any_call(expected2)
@@ -267,8 +268,8 @@ class TestSubscriberTransactions:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_subscriber_log_listener(listener, 'accountId',
-                                                                       date('2020-08-08T00:00:00.000Z'))
-            await sleep(0.08)
+                                                                       date('2020-08-08T00:00:00.000Z'), 10)
+            await sleep(0.11)
             user_log_listener_manager.remove_subscriber_log_listener(id)
             await sleep(0.22)
             call_stub.assert_any_call(expected)
@@ -290,7 +291,7 @@ class TestSubscriberTransactions:
                 'method': 'GET',
                 'params': {
                     'startTime': '2020-08-08T00:00:00.000Z',
-                    'limit': 1000
+                    'limit': 10
                 },
                 'headers': {
                     'auth-token': token
@@ -306,7 +307,7 @@ class TestSubscriberTransactions:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_subscriber_log_listener(listener, 'accountId',
-                                                                       date('2020-08-08T00:00:00.000Z'))
+                                                                       date('2020-08-08T00:00:00.000Z'), 10)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
             assert call_stub.call_count == 0
@@ -330,7 +331,7 @@ class TestSubscriberTransactions:
                 'method': 'GET',
                 'params': {
                     'startTime': '2020-08-08T00:00:00.000Z',
-                    'limit': 1000
+                    'limit': 10
                 },
                 'headers': {
                     'auth-token': token
@@ -343,7 +344,7 @@ class TestSubscriberTransactions:
                 'method': 'GET',
                 'params': {
                     'startTime': '2020-08-08T08:57:30.329Z',
-                    'limit': 1000
+                    'limit': 10
                 },
                 'headers': {
                     'auth-token': token
@@ -356,7 +357,7 @@ class TestSubscriberTransactions:
         with patch('lib.clients.copyFactory.streaming.userLogListenerManager.asyncio.sleep',
                    new=lambda x: sleep(x / 10)):
             id = user_log_listener_manager.add_subscriber_log_listener(listener, 'accountId',
-                                                                       date('2020-08-08T00:00:00.000Z'))
+                                                                       date('2020-08-08T00:00:00.000Z'), 10)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
             assert call_stub.call_count == 0
