@@ -239,7 +239,7 @@ class TestUserLogListener:
         listener = MagicMock()
         listener_id = trading_client.add_strategy_log_listener(listener, 'ABCD')
         assert listener_id == 'listenerId'
-        call_stub.assert_called_with(listener, 'ABCD', None)
+        call_stub.assert_called_with(listener, 'ABCD', None, None)
 
     @pytest.mark.asyncio
     async def test_remove_strategy_log_listener(self):
@@ -257,7 +257,7 @@ class TestUserLogListener:
         listener = MagicMock()
         listener_id = trading_client.add_subscriber_log_listener(listener, 'accountId')
         assert listener_id == 'listenerId'
-        call_stub.assert_called_with(listener, 'accountId', None)
+        call_stub.assert_called_with(listener, 'accountId', None, None)
 
     @pytest.mark.asyncio
     async def test_remove_subscriber_log_listener(self):

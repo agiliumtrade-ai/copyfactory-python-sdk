@@ -216,18 +216,19 @@ class TradingClient(MetaApiClient):
         self._stopoutListenerManager.remove_stopout_listener(listener_id)
 
     def add_strategy_log_listener(self, listener: UserLogListener, strategy_id: str,
-                                  start_time: datetime = None) -> str:
+                                  start_time: datetime = None, limit: int = None) -> str:
         """Adds a strategy log listener and creates a job to make requests.
 
         Args:
             listener: User log listener.
             strategy_id: Strategy id.
             start_time: Log search start time.
+            limit: Log pagination limit.
 
         Returns:
             Listener id.
         """
-        return self._userLogListenerManager.add_strategy_log_listener(listener, strategy_id, start_time)
+        return self._userLogListenerManager.add_strategy_log_listener(listener, strategy_id, start_time, limit)
 
     def remove_strategy_log_listener(self, listener_id: str):
         """Removes strategy log listener and cancels the event stream.
@@ -238,18 +239,19 @@ class TradingClient(MetaApiClient):
         self._userLogListenerManager.remove_strategy_log_listener(listener_id)
 
     def add_subscriber_log_listener(self, listener: UserLogListener, subscriber_id: str,
-                                    start_time: datetime = None) -> str:
+                                    start_time: datetime = None, limit: int = None) -> str:
         """Adds a subscriber log listener and creates a job to make requests.
 
         Args:
             listener: User log listener.
             subscriber_id: Subscriber id.
             start_time: Log search start time.
+            limit: Log pagination limit.
 
         Returns:
             Listener id.
         """
-        return self._userLogListenerManager.add_subscriber_log_listener(listener, subscriber_id, start_time)
+        return self._userLogListenerManager.add_subscriber_log_listener(listener, subscriber_id, start_time, limit)
 
     def remove_subscriber_log_listener(self, listener_id: str):
         """Removes subscriber log listener and cancels the event stream.

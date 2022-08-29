@@ -345,9 +345,9 @@ class CopyFactoryStrategyTimeSettings(TypedDict, total=False):
     openingIntervalInMinutes: Optional[float]
     """Time interval to copy new positions. Default is to let 1 minute for the position to get copied. If
     position were not copied during this time, the copying will not be retried anymore."""
-    expirePendingOrders: Optional[bool]
-    """If set to true, the openingIntervalInMinutes setting will be applied to pending orders as well. By default
-    pending order signals do not expire."""
+    expirePendingOrderSignals: Optional[bool]
+    """If set to true, the openingIntervalInMinutes setting will be applied to pending order signals as well.
+    By default pending order signals do not expire."""
 
 
 class StrategyTelegramPublishingSettings(TypedDict, total=False):
@@ -722,7 +722,7 @@ class CopyFactoryExternalSignalUpdate(TypedDict, total=False):
     takeProfit: Optional[float]
     """Take profit price."""
     openPrice: Optional[float]
-    """Pending order open price."""
+    """Pending or market order open price."""
 
 
 class CopyFactoryExternalSignalRemove(TypedDict, total=False):

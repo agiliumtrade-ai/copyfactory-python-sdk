@@ -42,36 +42,41 @@ class UserLogListenerManager(MetaApiClient):
         """
         return self._subscriberLogListeners
 
-    def add_strategy_log_listener(self, listener: UserLogListener, strategy_id: str, start_time: datetime = None):
+    def add_strategy_log_listener(self, listener: UserLogListener, strategy_id: str, start_time: datetime = None,
+                                  limit: int = None):
         """Adds a strategy transaction listener.
 
         Args:
             listener: User transaction listener.
             strategy_id: Strategy id.
             start_time: Transaction search start time.
+            limit: Log pagination limit.
 
         Returns:
             Strategy log listener id.
         """
         listener_id = random_id(10)
         self._strategyLogListeners[listener_id] = listener
-        asyncio.create_task(self._start_strategy_log_stream_job(listener_id, listener, strategy_id, start_time))
+        asyncio.create_task(self._start_strategy_log_stream_job(listener_id, listener, strategy_id, start_time, limit))
         return listener_id
 
-    def add_subscriber_log_listener(self, listener: UserLogListener, subscriber_id: str, start_time: datetime = None):
+    def add_subscriber_log_listener(self, listener: UserLogListener, subscriber_id: str, start_time: datetime = None,
+                                    limit: int = None):
         """Adds a subscriber transaction listener.
 
         Args:
             listener: User transaction listener.
             subscriber_id: Subscriber id.
             start_time: Transaction search start time.
+            limit: Log pagination limit.
 
         Returns:
             Subscriber transaction listener id.
         """
         listener_id = random_id(10)
         self._subscriberLogListeners[listener_id] = listener
-        asyncio.create_task(self._start_subscriber_log_stream_job(listener_id, listener, subscriber_id, start_time))
+        asyncio.create_task(self._start_subscriber_log_stream_job(listener_id, listener, subscriber_id, start_time,
+                                                                  limit))
         return listener_id
 
     def remove_strategy_log_listener(self, listener_id: str):
@@ -93,23 +98,26 @@ class UserLogListenerManager(MetaApiClient):
             del self._subscriberLogListeners[listener_id]
 
     async def _start_strategy_log_stream_job(self, listener_id: str, listener: UserLogListener,
-                                             strategy_id: str, start_time: datetime = None):
+                                             strategy_id: str, start_time: datetime = None, limit: int = None):
         throttle_time = self._errorThrottleTime
         while listener_id in self._strategyLogListeners:
             opts = {
                 'url': f'/users/current/strategies/{strategy_id}/user-log/stream',
                 'method': 'GET',
-                'params': {
-                    'limit': 1000
-                },
+                'params': {},
                 'headers': {
                     'auth-token': self._token
                 }
             }
             if start_time:
                 opts['params']['startTime'] = format_date(start_time)
+            if limit:
+                opts['params']['limit'] = limit
             try:
                 packets = await self._domainClient.request_copyfactory(opts, True)
+                # stop job if user has unsubscribed in time of new packets has been received
+                if listener_id not in self._strategyLogListeners:
+                    return
                 await listener.on_user_log(packets)
                 throttle_time = self._errorThrottleTime
                 if listener_id in self._strategyLogListeners and len(packets):
@@ -123,23 +131,26 @@ class UserLogListenerManager(MetaApiClient):
                 throttle_time = min(throttle_time * 2, 30)
 
     async def _start_subscriber_log_stream_job(self, listener_id: str, listener: UserLogListener,
-                                               subscriber_id: str, start_time: datetime = None):
+                                               subscriber_id: str, start_time: datetime = None, limit: int = None):
         throttle_time = self._errorThrottleTime
         while listener_id in self._subscriberLogListeners:
             opts = {
                 'url': f'/users/current/subscribers/{subscriber_id}/user-log/stream',
                 'method': 'GET',
-                'params': {
-                    'limit': 1000
-                },
+                'params': {},
                 'headers': {
                     'auth-token': self._token
                 }
             }
             if start_time:
                 opts['params']['startTime'] = format_date(start_time)
+            if limit:
+                opts['params']['limit'] = limit
             try:
                 packets = await self._domainClient.request_copyfactory(opts, True)
+                # stop job if user has unsubscribed in time of new packets has been received
+                if listener_id not in self._subscriberLogListeners:
+                    return
                 await listener.on_user_log(packets)
                 throttle_time = self._errorThrottleTime
                 if listener_id in self._subscriberLogListeners and len(packets):
