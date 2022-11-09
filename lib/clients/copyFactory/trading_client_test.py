@@ -125,7 +125,7 @@ class TestTradingClient:
         domain_client.request_copyfactory = AsyncMock(return_value=expected)
         records = await trading_client.get_user_log('e8867baa-5ec2-45ae-9930-4d5cea18d0d6',
                                                     date('2020-08-01T00:00:00.000Z'),
-                                                    date('2020-08-10T00:00:00.000Z'), 10, 100)
+                                                    date('2020-08-10T00:00:00.000Z'), 'strategyId', 'positionId')
         assert records == expected
         domain_client.request_copyfactory.assert_called_with({
             'url': '/users/current/subscribers/e8867baa-5ec2-45ae-9930-4d5cea18d0d6/user-log',
@@ -133,8 +133,10 @@ class TestTradingClient:
             'params': {
                 'startTime': '2020-08-01T00:00:00.000Z',
                 'endTime': '2020-08-10T00:00:00.000Z',
-                'offset': 10,
-                'limit': 100
+                'offset': 0,
+                'limit': 1000,
+                'strategyId': 'strategyId',
+                'positionId': 'positionId'
             },
             'headers': {
                 'auth-token': token
@@ -164,7 +166,7 @@ class TestTradingClient:
         }]
         domain_client.request_copyfactory = AsyncMock(return_value=expected)
         records = await trading_client.get_strategy_log('ABCD', date('2020-08-01T00:00:00.000Z'),
-                                                        date('2020-08-10T00:00:00.000Z'), 10, 100)
+                                                        date('2020-08-10T00:00:00.000Z'), 'positionId', 'DEBUG')
         assert records == expected
         domain_client.request_copyfactory.assert_called_with({
             'url': '/users/current/strategies/ABCD/user-log',
@@ -172,8 +174,10 @@ class TestTradingClient:
             'params': {
                 'startTime': '2020-08-01T00:00:00.000Z',
                 'endTime': '2020-08-10T00:00:00.000Z',
-                'offset': 10,
-                'limit': 100
+                'offset': 0,
+                'limit': 1000,
+                'level': 'DEBUG',
+                'positionId': 'positionId'
             },
             'headers': {
                 'auth-token': token
@@ -239,7 +243,7 @@ class TestUserLogListener:
         listener = MagicMock()
         listener_id = trading_client.add_strategy_log_listener(listener, 'ABCD')
         assert listener_id == 'listenerId'
-        call_stub.assert_called_with(listener, 'ABCD', None, None)
+        call_stub.assert_called_with(listener, 'ABCD', None, None, None, None)
 
     @pytest.mark.asyncio
     async def test_remove_strategy_log_listener(self):
@@ -257,7 +261,7 @@ class TestUserLogListener:
         listener = MagicMock()
         listener_id = trading_client.add_subscriber_log_listener(listener, 'accountId')
         assert listener_id == 'listenerId'
-        call_stub.assert_called_with(listener, 'accountId', None, None)
+        call_stub.assert_called_with(listener, 'accountId', None, None, None, None, None)
 
     @pytest.mark.asyncio
     async def test_remove_subscriber_log_listener(self):

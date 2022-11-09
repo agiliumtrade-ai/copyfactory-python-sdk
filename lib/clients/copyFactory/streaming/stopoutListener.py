@@ -14,3 +14,11 @@ class StopoutListener:
             strategy_stopout_event: Strategy stopout event with an array of packets.
         """
         pass
+
+    async def on_error(self, error: Exception):
+        """Calls a predefined function with the received error.
+
+        Args:
+            error: Error received during retrieve attempt.
+        """
+        pass

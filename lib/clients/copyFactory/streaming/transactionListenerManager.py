@@ -5,6 +5,7 @@ from ...errorHandler import NotFoundException
 from .transactionListener import TransactionListener
 from datetime import datetime, timedelta
 from ....logger import LoggerManager
+import math
 import asyncio
 
 
@@ -118,11 +119,15 @@ class TransactionListenerManager(MetaApiClient):
                 throttle_time = self._errorThrottleTime
                 if listener_id in self._strategyTransactionListeners and len(packets):
                     start_time = date(packets[0]['time']) + timedelta(milliseconds=1)
-            except NotFoundException:
+            except NotFoundException as err:
+                await listener.on_error(err)
                 self._logger.error(f'Strategy {strategy_id} not found, removing listener f{listener_id}')
                 if listener_id in self._strategyTransactionListeners:
                     del self._strategyTransactionListeners[listener_id]
-            except Exception:
+            except Exception as err:
+                await listener.on_error(err)
+                self._logger.error(f'Failed to retrieve transactions stream for strategy {strategy_id}, ' +
+                                   f'listener {listener_id}, retrying in {math.floor(throttle_time)} seconds', err)
                 await asyncio.sleep(throttle_time)
                 throttle_time = min(throttle_time * 2, 30)
 
@@ -148,10 +153,14 @@ class TransactionListenerManager(MetaApiClient):
                 throttle_time = self._errorThrottleTime
                 if listener_id in self._subscriberTransactionListeners and len(packets):
                     start_time = date(packets[0]['time']) + timedelta(milliseconds=1)
-            except NotFoundException:
+            except NotFoundException as err:
+                await listener.on_error(err)
                 self._logger.error(f'Subscriber {subscriber_id} not found, removing listener f{listener_id}')
                 if listener_id in self._subscriberTransactionListeners:
                     del self._subscriberTransactionListeners[listener_id]
-            except Exception:
+            except Exception as err:
+                await listener.on_error(err)
+                self._logger.error(f'Failed to retrieve transactions stream for subscriber {subscriber_id}, ' +
+                                   f'listener {listener_id}, retrying in {math.floor(throttle_time)} seconds', err)
                 await asyncio.sleep(throttle_time)
                 throttle_time = min(throttle_time * 2, 30)

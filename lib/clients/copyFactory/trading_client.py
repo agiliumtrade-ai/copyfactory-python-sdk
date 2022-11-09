@@ -3,7 +3,8 @@ from ..domain_client import DomainClient
 from .streaming.stopoutListenerManager import StopoutListenerManager
 from .streaming.userLogListenerManager import UserLogListenerManager
 from .signal_client import SignalClient
-from .copyFactory_models import CopyFactoryStrategyStopout, CopyFactoryUserLogMessage, CopyFactoryStrategyStopoutReason
+from .copyFactory_models import CopyFactoryStrategyStopout, CopyFactoryUserLogMessage, \
+    CopyFactoryStrategyStopoutReason, LogLevel
 from .streaming.stopoutListener import StopoutListener
 from .streaming.userLogListener import UserLogListener
 from typing import List
@@ -119,6 +120,7 @@ class TradingClient(MetaApiClient):
         return await self._domainClient.request_copyfactory(opts)
 
     async def get_user_log(self, subscriber_id: str, start_time: datetime = None, end_time: datetime = None,
+                           strategy_id: str = None, position_id: str = None, level: LogLevel = None,
                            offset: int = 0, limit: int = 1000) -> 'List[CopyFactoryUserLogMessage]':
         """Returns copy trading user log for an account and time range, sorted in reverse chronological order. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getUserLog/
@@ -127,6 +129,9 @@ class TradingClient(MetaApiClient):
             subscriber_id: Subscriber id.
             start_time: Time to start loading data from.
             end_time: Time to stop loading data at.
+            strategy_id: Strategy id filter.
+            position_id: Position id filter.
+            level: Minimum severity level.
             offset: Pagination offset. Default is 0.
             limit: Pagination limit. Default is 1000.
 
@@ -143,6 +148,12 @@ class TradingClient(MetaApiClient):
             qs['startTime'] = format_date(start_time)
         if end_time:
             qs['endTime'] = format_date(end_time)
+        if strategy_id:
+            qs['strategyId'] = strategy_id
+        if position_id:
+            qs['positionId'] = position_id
+        if level:
+            qs['level'] = level
         opts = {
             'url': f'/users/current/subscribers/{subscriber_id}/user-log',
             'method': 'GET',
@@ -156,6 +167,7 @@ class TradingClient(MetaApiClient):
         return result
 
     async def get_strategy_log(self, strategy_id: str, start_time: datetime = None, end_time: datetime = None,
+                               position_id: str = None, level: LogLevel = None,
                                offset: int = 0, limit: int = 1000) -> 'List[CopyFactoryUserLogMessage]':
         """Returns event log for CopyFactory strategy, sorted in reverse chronological order. See
         https://metaapi.cloud/docs/copyfactory/restApi/api/trading/getStrategyLog/
@@ -164,6 +176,8 @@ class TradingClient(MetaApiClient):
             strategy_id: Strategy id to retrieve log for.
             start_time: Time to start loading data from.
             end_time: Time to stop loading data at.
+            position_id: Position id filter.
+            level: Minimum severity level.
             offset: Pagination offset. Default is 0.
             limit: Pagination limit. Default is 1000.
 
@@ -180,6 +194,10 @@ class TradingClient(MetaApiClient):
             qs['startTime'] = format_date(start_time)
         if end_time:
             qs['endTime'] = format_date(end_time)
+        if position_id:
+            qs['positionId'] = position_id
+        if level:
+            qs['level'] = level
         opts = {
             'url': f'/users/current/strategies/{strategy_id}/user-log',
             'method': 'GET',
@@ -215,20 +233,23 @@ class TradingClient(MetaApiClient):
         """
         self._stopoutListenerManager.remove_stopout_listener(listener_id)
 
-    def add_strategy_log_listener(self, listener: UserLogListener, strategy_id: str,
-                                  start_time: datetime = None, limit: int = None) -> str:
+    def add_strategy_log_listener(self, listener: UserLogListener, strategy_id: str, start_time: datetime = None,
+                                  position_id: str = None, level: LogLevel = None, limit: int = None) -> str:
         """Adds a strategy log listener and creates a job to make requests.
 
         Args:
             listener: User log listener.
             strategy_id: Strategy id.
             start_time: Log search start time.
+            position_id: Position id filter.
+            level: Minimum severity level.
             limit: Log pagination limit.
 
         Returns:
             Listener id.
         """
-        return self._userLogListenerManager.add_strategy_log_listener(listener, strategy_id, start_time, limit)
+        return self._userLogListenerManager.add_strategy_log_listener(listener, strategy_id, start_time, position_id,
+                                                                      level, limit)
 
     def remove_strategy_log_listener(self, listener_id: str):
         """Removes strategy log listener and cancels the event stream.
@@ -238,20 +259,25 @@ class TradingClient(MetaApiClient):
         """
         self._userLogListenerManager.remove_strategy_log_listener(listener_id)
 
-    def add_subscriber_log_listener(self, listener: UserLogListener, subscriber_id: str,
-                                    start_time: datetime = None, limit: int = None) -> str:
+    def add_subscriber_log_listener(self, listener: UserLogListener, subscriber_id: str, start_time: datetime = None,
+                                    strategy_id: str = None, position_id: str = None, level: LogLevel = None,
+                                    limit: int = None) -> str:
         """Adds a subscriber log listener and creates a job to make requests.
 
         Args:
             listener: User log listener.
             subscriber_id: Subscriber id.
             start_time: Log search start time.
+            strategy_id: Strategy id filter.
+            position_id: Position id filter.
+            level: Minimum severity level.
             limit: Log pagination limit.
 
         Returns:
             Listener id.
         """
-        return self._userLogListenerManager.add_subscriber_log_listener(listener, subscriber_id, start_time, limit)
+        return self._userLogListenerManager.add_subscriber_log_listener(
+            listener, subscriber_id, start_time, strategy_id, position_id, level, limit)
 
     def remove_subscriber_log_listener(self, listener_id: str):
         """Removes subscriber log listener and cancels the event stream.

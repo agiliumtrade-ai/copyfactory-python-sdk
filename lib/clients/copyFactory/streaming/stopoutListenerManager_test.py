@@ -57,6 +57,7 @@ expected2 = [
 domain_client = DomainClient(MagicMock(), token)
 stopout_listener_manager = StopoutListenerManager(domain_client)
 call_stub = MagicMock()
+error_stub = MagicMock()
 listener = StopoutListener()
 
 
@@ -72,6 +73,9 @@ async def run_around_tests():
     class Listener(StopoutListener):
         async def on_stopout(self, strategy_stopout_event):
             call_stub(strategy_stopout_event)
+
+        async def on_error(self, error: Exception):
+            error_stub(error)
 
     global listener
     listener = Listener()
@@ -143,12 +147,16 @@ class TestStopoutListenerManager:
     async def test_wait_if_error_returned(self):
         """Should wait if error returned."""
         call_count = 0
+        error = Exception('test')
+        error2 = Exception('test')
 
         async def get_stopout_func(arg, arg2):
             nonlocal call_count
             call_count += 1
-            if call_count < 3:
-                raise Exception('test')
+            if call_count == 1:
+                raise error
+            if call_count == 2:
+                raise error2
 
             if arg == {
                 'url': '/users/current/stopouts/stream',
@@ -177,9 +185,13 @@ class TestStopoutListenerManager:
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
             assert call_stub.call_count == 0
+            assert error_stub.call_count == 1
+            error_stub.assert_any_call(error)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 2
             assert call_stub.call_count == 0
+            assert error_stub.call_count == 2
+            error_stub.assert_any_call(error2)
             await sleep(0.2)
             assert domain_client.request_copyfactory.call_count == 3
             assert call_stub.call_count == 0
