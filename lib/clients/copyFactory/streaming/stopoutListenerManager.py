@@ -2,6 +2,8 @@ from ...metaApi_client import MetaApiClient
 from ...domain_client import DomainClient
 from ....models import random_id
 from .stopoutListener import StopoutListener
+from ....logger import LoggerManager
+import math
 import asyncio
 
 
@@ -18,6 +20,7 @@ class StopoutListenerManager(MetaApiClient):
         self._domainClient = domain_client
         self._stopoutListeners = {}
         self._errorThrottleTime = 1
+        self._logger = LoggerManager.get_logger('StopoutListenerManager')
 
     @property
     def stopout_listeners(self):
@@ -80,5 +83,8 @@ class StopoutListenerManager(MetaApiClient):
                 if listener_id in self._stopoutListeners and len(packets):
                     sequence_number = packets[-1]['sequenceNumber']
             except Exception as err:
+                await listener.on_error(err)
+                self._logger.error(f'Failed to retrieve stopouts stream for strategy {strategy_id}, ' +
+                                   f'listener {listener_id}, retrying in {math.floor(throttle_time)} seconds', err)
                 await asyncio.sleep(throttle_time)
                 throttle_time = min(throttle_time * 2, 30)

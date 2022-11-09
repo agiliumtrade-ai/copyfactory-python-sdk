@@ -17,6 +17,9 @@ async def stopout_example():
         async def on_stopout(self, strategy_stopout_event):
             print('Strategy stopout event', strategy_stopout_event)
 
+        async def on_error(self, error: Exception):
+            print('Error event', error)
+
     try:
         listener = Listener()
 

@@ -1,3 +1,10 @@
+6.0.0
+  - add logs on retrieve stream errors
+  - fixed FAQ URL
+  - fixed strategy log stream job
+  - breaking change: added strategyId, positionId, level params to subscriber logs search & streaming
+  - breaking change: added positionId, level params to strategy logs search & streaming
+
 5.11.0
   - added limit param to subscriber & strategy log streaming
   - fix subscriber & strategy extra log streaming after unsubscription

@@ -32,6 +32,7 @@ expected2 = [{
 domain_client = DomainClient(MagicMock(), token)
 transaction_listener_manager = TransactionListenerManager(domain_client)
 call_stub = MagicMock()
+error_stub = MagicMock()
 listener = TransactionListener()
 
 
@@ -43,10 +44,15 @@ async def run_around_tests():
     transaction_listener_manager = TransactionListenerManager(domain_client)
     global call_stub
     call_stub = MagicMock()
+    global error_stub
+    error_stub = MagicMock()
 
     class Listener(TransactionListener):
         async def on_transaction(self, transaction_event: List[CopyFactoryTransaction]):
             call_stub(transaction_event)
+
+        async def on_error(self, error: Exception):
+            error_stub(error)
 
     global listener
     listener = Listener()
@@ -118,12 +124,16 @@ class TestStrategyTransactions:
     async def test_wait_if_error_returned(self):
         """Should wait if error returned."""
         call_count = 0
+        error = Exception('test')
+        error2 = Exception('test')
 
         async def get_transaction_func(arg, arg2):
             nonlocal call_count
             call_count += 1
-            if call_count < 3:
-                raise Exception('test')
+            if call_count == 1:
+                raise error
+            if call_count == 2:
+                raise error2
 
             if arg == {
                 'url': '/users/current/strategies/ABCD/transactions/stream',
@@ -150,9 +160,13 @@ class TestStrategyTransactions:
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
             assert call_stub.call_count == 0
+            assert error_stub.call_count == 1
+            error_stub.assert_any_call(error)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 2
             assert call_stub.call_count == 0
+            assert error_stub.call_count == 2
+            error_stub.assert_any_call(error2)
             await sleep(0.2)
             assert domain_client.request_copyfactory.call_count == 3
             assert call_stub.call_count == 0
@@ -163,6 +177,7 @@ class TestStrategyTransactions:
     @pytest.mark.asyncio
     async def test_remove_listener_on_not_found_error(self):
         """Should remove listener on not found error."""
+        error = NotFoundException('test')
 
         async def get_transactions_func(arg, arg2):
             if arg == {
@@ -190,7 +205,7 @@ class TestStrategyTransactions:
                 },
             }:
                 await sleep(0.1)
-                raise NotFoundException('test')
+                raise error
 
         domain_client.request_copyfactory = AsyncMock(side_effect=get_transactions_func)
         with patch('lib.clients.copyFactory.streaming.transactionListenerManager.asyncio.sleep',
@@ -208,6 +223,8 @@ class TestStrategyTransactions:
             assert call_stub.call_count == 1
             await sleep(0.08)
             assert call_stub.call_count == 1
+            error_stub.assert_called_once()
+            error_stub.assert_called_with(error)
             transaction_listener_manager.remove_strategy_transaction_listener(id)
 
 
@@ -277,12 +294,16 @@ class TestSubscriberTransactions:
     async def test_wait_if_error_returned(self):
         """Should wait if error returned."""
         call_count = 0
+        error = Exception('test')
+        error2 = Exception('test')
 
         async def get_transaction_func(arg, arg2):
             nonlocal call_count
             call_count += 1
-            if call_count < 3:
-                raise Exception('test')
+            if call_count == 1:
+                raise error
+            if call_count == 2:
+                raise error2
 
             if arg == {
                 'url': '/users/current/subscribers/accountId/transactions/stream',
@@ -309,9 +330,13 @@ class TestSubscriberTransactions:
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 1
             assert call_stub.call_count == 0
+            assert error_stub.call_count == 1
+            error_stub.assert_any_call(error)
             await sleep(0.06)
             assert domain_client.request_copyfactory.call_count == 2
             assert call_stub.call_count == 0
+            assert error_stub.call_count == 2
+            error_stub.assert_any_call(error2)
             await sleep(0.2)
             assert domain_client.request_copyfactory.call_count == 3
             assert call_stub.call_count == 0
@@ -322,6 +347,7 @@ class TestSubscriberTransactions:
     @pytest.mark.asyncio
     async def test_remove_listener_on_not_found_error(self):
         """Should remove listener on not found error."""
+        error = NotFoundException('test')
 
         async def get_transactions_func(arg, arg2):
             if arg == {
@@ -349,7 +375,7 @@ class TestSubscriberTransactions:
                 },
             }:
                 await sleep(0.1)
-                raise NotFoundException('test')
+                raise error
 
         domain_client.request_copyfactory = AsyncMock(side_effect=get_transactions_func)
         with patch('lib.clients.copyFactory.streaming.transactionListenerManager.asyncio.sleep',
@@ -367,4 +393,6 @@ class TestSubscriberTransactions:
             assert call_stub.call_count == 1
             await sleep(0.08)
             assert call_stub.call_count == 1
+            error_stub.assert_called_once()
+            error_stub.assert_called_with(error)
             transaction_listener_manager.remove_strategy_transaction_listener(id)

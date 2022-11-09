@@ -30,7 +30,7 @@ infrastructure maintenance costs.
 Frequently asked questions (FAQ)
 ================================
 
-FAQ is located here: `http://metaapi.cloud/docs/copyfactory/faq <http://metaapi.cloud/docs/copyfactory/faq>`_
+FAQ is located here: `https://metaapi.cloud/docs/copyfactory/faq/ <http://metaapi.cloud/docs/copyfactory/faq/>`_
 
 CopyFactory copytrading API features
 ====================================
@@ -268,8 +268,12 @@ You can subscribe to a stream of stopout events using the stopout listener.
     class Listener(StopoutListener):
 
         # specify the function called on event arrival
-        async def on_stopout(strategy_stopout_event):
+        async def on_stopout(self, strategy_stopout_event):
             print('Strategy stopout event', strategy_stopout_event)
+
+        # specify the function called on error event
+        async def on_error(self, error):
+            print('Error event', error)
 
     # add listener
     listener = Listener()
@@ -309,8 +313,12 @@ Strategy logs
     class Listener(UserLogListener):
 
         # specify the function called on event arrival
-        async def on_user_log(log_event):
+        async def on_user_log(self, log_event):
             print('Strategy user log event', log_event)
+
+        # specify the function called on error event
+        async def on_error(self, error):
+            print('Error event', error)
 
     # add listener
     listener = Listener()
@@ -332,8 +340,12 @@ Subscriber logs
     class Listener(UserLogListener):
 
         # specify the function called on event arrival
-        async def on_user_log(log_event):
+        async def on_user_log(self, log_event):
             print('Subscriber user log event', log_event)
+
+        # specify the function called on error event
+        async def on_error(self, error):
+            print('Error event', error)
 
     # add listener
     listener = Listener()
@@ -359,8 +371,12 @@ Strategy transactions
     class Listener(TransactionListener):
 
         # specify the function called on event arrival
-        async def on_transaction(transaction_event):
+        async def on_transaction(self, transaction_event):
             print('Strategy transaction event', transaction_event)
+
+        # specify the function called on error event
+        async def on_error(self, error):
+            print('Error event', error)
 
     # add listener
     listener = Listener()
@@ -384,6 +400,10 @@ Subscriber transactions
         # specify the function called on event arrival
         async def on_transaction(transaction_event):
             print('Subscriber transaction event', transaction_event)
+
+        # specify the function called on error event
+        async def on_error(self, error):
+            print('Error event', error)
 
     # add listener
     listener = Listener()
