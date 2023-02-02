@@ -1,6 +1,6 @@
 from ..domain_client import DomainClient
 from .copyFactory_models import CopyFactoryExternalSignalUpdate, CopyFactoryExternalSignalRemove, \
-    CopyFactoryTradingSignal
+    CopyFactoryTradingSignal, CopyFactoryExternalSignal
 from typing import List
 from copy import deepcopy
 from ...models import convert_iso_time_to_date, format_request, random_id
@@ -39,6 +39,28 @@ class SignalClient:
         """
         opts = {
             'url': f'/users/current/subscribers/{self._accountId}/signals',
+            'method': 'GET',
+            'headers': {
+                'auth-token': self._domainClient.token
+            }
+        }
+        result = await self._domainClient.request_signal(opts, self._host, self._accountId)
+        convert_iso_time_to_date(result)
+        return result
+
+    async def get_strategy_external_signals(self, strategy_id: str) -> 'List[CopyFactoryExternalSignal]':
+        """Returns active external signals of a strategy. Requires access to
+        copyfactory-api:rest:public:external-signals:getSignals method which is included into reader role.
+        Requires access to strategy, account resources.
+
+        Args:
+            strategy_id: Strategy id.
+
+        Returns:
+            A coroutine which resolves with external signals found.
+        """
+        opts = {
+            'url': f'/users/current/strategies/{strategy_id}/external-signals',
             'method': 'GET',
             'headers': {
                 'auth-token': self._domainClient.token
