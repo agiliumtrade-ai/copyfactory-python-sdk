@@ -192,6 +192,24 @@ class TestDomainClient:
 
     @respx.mock
     @pytest.mark.asyncio
+    async def test_roll_over_to_first_region_if_all_regions_failed(self):
+        """Should roll over to the first region if all regions failed."""
+        request_call.mock(return_value=Response(500))
+        respx.get('https://copyfactory-api-v1.us-west.agiliumtrade.agiliumtrade.ai/users/current/' +
+                  'configuration/strategies') \
+            .mock(return_value=Response(500))
+        try:
+            await domain_client.request_copyfactory(opts)
+            pytest.fail()
+        except Exception as err:
+            assert err.__class__.__name__ == 'InternalException'
+
+        request_call.mock(return_value=Response(200, content=json.dumps(expected)))
+        response = await domain_client.request_copyfactory(opts)
+        assert response == expected
+
+    @respx.mock
+    @pytest.mark.asyncio
     async def test_execute_normal_request(self):
         """Should execute request."""
         opts = {

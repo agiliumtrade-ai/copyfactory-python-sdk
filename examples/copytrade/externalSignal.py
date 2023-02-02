@@ -70,6 +70,9 @@ async def external_signal():
 
         await asyncio.sleep(10)
 
+        # output strategy external signals
+        print(await signal_client.get_strategy_external_signals(strategy_id))
+
         # output trading signals
         print(await signal_client.get_trading_signals())
 

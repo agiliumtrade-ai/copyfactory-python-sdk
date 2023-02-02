@@ -1,3 +1,7 @@
+6.1.0
+  - added retrieve strategy external signals method
+  - added rolling over to the first region if requests on all regions failed
+
 6.0.0
   - add logs on retrieve stream errors
   - fixed FAQ URL

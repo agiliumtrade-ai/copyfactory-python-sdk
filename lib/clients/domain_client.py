@@ -71,6 +71,7 @@ class DomainClient:
                 raise err
             else:
                 if len(self._regionCache) == self._regionIndex + 1:
+                    self._regionIndex = 0
                     raise err
                 else:
                     self._regionIndex += 1

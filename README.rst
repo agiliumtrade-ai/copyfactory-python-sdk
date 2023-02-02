@@ -222,6 +222,9 @@ You can submit external trading signals to your trading strategy.
         'volume': 0.01
     })
 
+    # get external signals
+    print(await signal_client.get_strategy_external_signals(strategy_id))
+
     # remove signal
     await signal_client.remove_external_signal(strategy_id=strategy_id, signal_id=signal_id, signal={
         'time': datetime.now()

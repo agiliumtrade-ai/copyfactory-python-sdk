@@ -725,6 +725,12 @@ class CopyFactoryExternalSignalUpdate(TypedDict, total=False):
     """Pending or market order open price."""
 
 
+class CopyFactoryExternalSignal(CopyFactoryExternalSignalUpdate, total=False):
+    """CopyFactory external signal."""
+    id: str
+    """External signal id."""
+
+
 class CopyFactoryExternalSignalRemove(TypedDict, total=False):
     """CopyFactory external signal remove payload."""
     time: datetime

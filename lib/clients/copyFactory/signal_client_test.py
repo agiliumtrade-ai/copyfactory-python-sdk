@@ -91,3 +91,25 @@ class TestTradingClient:
                 'auth-token': token
             },
         }, host, 'accountId')
+
+    @pytest.mark.asyncio
+    async def test_retrieve_external_signals(self):
+        """Should retrieve strategy external signals."""
+        expected = [{
+            'id': '1',
+            'symbol': 'EURUSD',
+            'type': 'POSITION_TYPE_BUY',
+            'time': '2020-08-24T00:00:00.000Z',
+            'volume': 1
+        }]
+
+        domain_client.request_signal = AsyncMock(return_value=expected)
+        signals = await signal_client.get_strategy_external_signals('ABCD')
+        assert signals == expected
+        domain_client.request_signal.assert_called_with({
+            'url': '/users/current/strategies/ABCD/external-signals',
+            'method': 'GET',
+            'headers': {
+                'auth-token': token
+            },
+        }, host, 'accountId')
