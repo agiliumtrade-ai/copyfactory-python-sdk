@@ -1,3 +1,6 @@
+6.1.1
+  - update package information
+
 6.1.0
   - added retrieve strategy external signals method
   - added rolling over to the first region if requests on all regions failed

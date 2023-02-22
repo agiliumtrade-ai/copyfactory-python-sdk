@@ -14,9 +14,9 @@ tests_require = [
 
 setuptools.setup(
     name="metaapi_cloud_copyfactory_sdk",
-    version="6.1.0",
-    author="Agilium Labs LLC",
-    author_email="agiliumtrade@agiliumtrade.ai",
+    version="6.1.1",
+    author="MetaApi DMCC",
+    author_email="support@metaapi.cloud",
     description="Python SDK for SDK for CopyFactory trade copying API. Can copy trades both between MetaTrader 5 "
                 "(MT5) and MetaTrader 4 (MT4). (https://metaapi.cloud)",
     long_description=long_description,
